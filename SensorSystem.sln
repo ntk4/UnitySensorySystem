@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2015
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorSystem.CSharp.Plugins", "SensorSystem.CSharp.Plugins.csproj", "{F0539690-DF18-AA38-3A8B-944E425B484F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorSystem.CSharp", "SensorSystem.CSharp.csproj", "{D42F8FCA-358E-23CC-D4E8-D718AFD7F83C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SensorSystem.CSharp.Editor", "SensorSystem.CSharp.Editor.csproj", "{2720A31C-FAC1-3859-0E8D-6073B1DE7708}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F0539690-DF18-AA38-3A8B-944E425B484F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F0539690-DF18-AA38-3A8B-944E425B484F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F0539690-DF18-AA38-3A8B-944E425B484F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F0539690-DF18-AA38-3A8B-944E425B484F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D42F8FCA-358E-23CC-D4E8-D718AFD7F83C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D42F8FCA-358E-23CC-D4E8-D718AFD7F83C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D42F8FCA-358E-23CC-D4E8-D718AFD7F83C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D42F8FCA-358E-23CC-D4E8-D718AFD7F83C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2720A31C-FAC1-3859-0E8D-6073B1DE7708}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2720A31C-FAC1-3859-0E8D-6073B1DE7708}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2720A31C-FAC1-3859-0E8D-6073B1DE7708}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2720A31C-FAC1-3859-0E8D-6073B1DE7708}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

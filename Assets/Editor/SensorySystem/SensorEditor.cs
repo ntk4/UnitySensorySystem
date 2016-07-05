@@ -41,82 +41,84 @@ public class SensorEditor : Editor
                 MarkSceneDirty();
                 SceneView.RepaintAll();
             }
-
-            for (int i = 0; i < sensor.ViewCones.Count; i++)
+            if (sensor.ViewCones != null)
             {
-                EditorGUILayout.Space();
-                EditorGUILayout.LabelField("View Cone " + (i + 1), EditorStyles.boldLabel);
-
-                int value = EditorGUILayout.IntSlider("FoV (degrees)", sensor.ViewCones[i].FoVAngle, 0, 180);
-                if (value != sensor.ViewCones[i].FoVAngle)
+                for (int i = 0; i < sensor.ViewCones.Count; i++)
                 {
-                    Undo.RecordObject(sensor, "Change View Cone");
-                    MarkSceneDirty();
-                    sensor.ViewCones[i].FoVAngle = value;
-                    SceneView.RepaintAll();
-                }
+                    EditorGUILayout.Space();
+                    EditorGUILayout.LabelField("View Cone " + (i + 1), EditorStyles.boldLabel);
 
-                value = EditorGUILayout.IntSlider("Range of sight", (int)sensor.ViewCones[i].Range, 0, 15);
-                if (value != sensor.ViewCones[i].Range)
-                {
-                    Undo.RecordObject(sensor, "Change View Cone");
-                    MarkSceneDirty();
-                    sensor.ViewCones[i].Range = value;
-                    SceneView.RepaintAll();
-                }
+                    int value = EditorGUILayout.IntSlider("FoV (degrees)", sensor.ViewCones[i].FoVAngle, 0, 180);
+                    if (value != sensor.ViewCones[i].FoVAngle)
+                    {
+                        Undo.RecordObject(sensor, "Change View Cone");
+                        MarkSceneDirty();
+                        sensor.ViewCones[i].FoVAngle = value;
+                        SceneView.RepaintAll();
+                    }
 
-                Awareness aw = (Awareness)EditorGUILayout.EnumPopup("Awareness Level", sensor.ViewCones[i].AwarenessLevel);
-                if (aw != sensor.ViewCones[i].AwarenessLevel)
-                {
-                    Undo.RecordObject(sensor, "Change View Cone");
-                    MarkSceneDirty();
-                    sensor.ViewCones[i].AwarenessLevel = aw;
-                    SceneView.RepaintAll();
-                }
+                    value = EditorGUILayout.IntSlider("Range of sight", (int)sensor.ViewCones[i].Range, 0, 15);
+                    if (value != sensor.ViewCones[i].Range)
+                    {
+                        Undo.RecordObject(sensor, "Change View Cone");
+                        MarkSceneDirty();
+                        sensor.ViewCones[i].Range = value;
+                        SceneView.RepaintAll();
+                    }
 
-                value = EditorGUILayout.IntSlider("Horizontal Offset", sensor.ViewCones[i].HorizontalOffset, 0, 360);
-                if (value != sensor.ViewCones[i].HorizontalOffset)
-                {
-                    Undo.RecordObject(sensor, "Change View Cone");
-                    MarkSceneDirty();
-                    sensor.ViewCones[i].HorizontalOffset = value;
-                    SceneView.RepaintAll();
-                }
+                    Awareness aw = (Awareness)EditorGUILayout.EnumPopup("Awareness Level", sensor.ViewCones[i].AwarenessLevel);
+                    if (aw != sensor.ViewCones[i].AwarenessLevel)
+                    {
+                        Undo.RecordObject(sensor, "Change View Cone");
+                        MarkSceneDirty();
+                        sensor.ViewCones[i].AwarenessLevel = aw;
+                        SceneView.RepaintAll();
+                    }
 
-                value = EditorGUILayout.IntSlider("Recognition delay", sensor.ViewCones[i].RecognitionDelayFrames, 0, 60);
-                if (value != sensor.ViewCones[i].RecognitionDelayFrames)
-                {
-                    Undo.RecordObject(sensor, "Change Recognition delay");
-                    MarkSceneDirty();
-                    sensor.ViewCones[i].RecognitionDelayFrames = value;
-                    SceneView.RepaintAll();
-                }
+                    value = EditorGUILayout.IntSlider("Horizontal Offset", sensor.ViewCones[i].HorizontalOffset, 0, 360);
+                    if (value != sensor.ViewCones[i].HorizontalOffset)
+                    {
+                        Undo.RecordObject(sensor, "Change View Cone");
+                        MarkSceneDirty();
+                        sensor.ViewCones[i].HorizontalOffset = value;
+                        SceneView.RepaintAll();
+                    }
 
-                Color col = EditorGUILayout.ColorField("Scene color", sensor.ViewCones[i].SceneColor);
-                if (col != sensor.ViewCones[i].SceneColor)
-                {
-                    Undo.RecordObject(sensor, "Change View Cone");
-                    MarkSceneDirty();
-                    sensor.ViewCones[i].SceneColor = col;
-                    SceneView.RepaintAll();
-                }
+                    value = EditorGUILayout.IntSlider("Recognition delay", sensor.ViewCones[i].RecognitionDelayFrames, 0, 60);
+                    if (value != sensor.ViewCones[i].RecognitionDelayFrames)
+                    {
+                        Undo.RecordObject(sensor, "Change Recognition delay");
+                        MarkSceneDirty();
+                        sensor.ViewCones[i].RecognitionDelayFrames = value;
+                        SceneView.RepaintAll();
+                    }
 
-                bool drawCone = EditorGUILayout.Toggle("Draw", sensor.ViewCones[i].DrawCone);
-                if (drawCone != sensor.ViewCones[i].DrawCone)
-                {
-                    Undo.RecordObject(sensor, (drawCone?"Enable":"Disable") + " Draw Cone");
-                    sensor.ViewCones[i].DrawCone = drawCone;
-                    MarkSceneDirty();
-                    SceneView.RepaintAll();
-                }
-                
+                    Color col = EditorGUILayout.ColorField("Scene color", sensor.ViewCones[i].SceneColor);
+                    if (col != sensor.ViewCones[i].SceneColor)
+                    {
+                        Undo.RecordObject(sensor, "Change View Cone");
+                        MarkSceneDirty();
+                        sensor.ViewCones[i].SceneColor = col;
+                        SceneView.RepaintAll();
+                    }
 
-                if (GUILayout.Button("Remove"))
-                {
-                    Undo.RecordObject(sensor, "Remove View Cone");
-                    sensor.RemoveViewCone(i);
-                    MarkSceneDirty();
-                    SceneView.RepaintAll();
+                    bool drawCone = EditorGUILayout.Toggle("Draw", sensor.ViewCones[i].DrawCone);
+                    if (drawCone != sensor.ViewCones[i].DrawCone)
+                    {
+                        Undo.RecordObject(sensor, (drawCone ? "Enable" : "Disable") + " Draw Cone");
+                        sensor.ViewCones[i].DrawCone = drawCone;
+                        MarkSceneDirty();
+                        SceneView.RepaintAll();
+                    }
+
+
+                    if (GUILayout.Button("Remove"))
+                    {
+                        Undo.RecordObject(sensor, "Remove View Cone");
+                        sensor.RemoveViewCone(i);
+                        MarkSceneDirty();
+                        SceneView.RepaintAll();
+                    }
                 }
             }
         }

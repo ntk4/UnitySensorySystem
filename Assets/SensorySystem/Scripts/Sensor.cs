@@ -162,7 +162,8 @@ public class Sensor : MonoBehaviour
         if (signalDetectionMonobehaviorHandler != "" && signalDetectionHandlerMethod != "")
         {
             IEnumerable<MonoBehaviour> allCallbacks = gameObject.GetComponents<MonoBehaviour>().
-                Where(x => x.name == signalDetectionMonobehaviorHandler || x.GetType().Name == signalDetectionMonobehaviorHandler);
+                Where(x => x.name == signalDetectionMonobehaviorHandler || x.GetType().Name == signalDetectionMonobehaviorHandler ||
+                x.GetType().BaseType.Name == signalDetectionMonobehaviorHandler);
 
             if (allCallbacks.Count() <= 0)
             {

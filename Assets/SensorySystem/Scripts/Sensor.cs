@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.Events;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -8,23 +9,32 @@ public class Sensor : MonoBehaviour
 {
     public SenseType Sense;
     
-    public List<ViewCone> ViewCones;
+    public List<ViewCone> ViewCones = new List<ViewCone>();
     
     public bool DrawCones = true;
 
     public Alertness CurrentAlertnessLevel;
 
     public float CoolDownSeconds;
+
+    public bool CustomDistanceCalculation = false;
     
     // Callbacks
     public MethodInfo CallbackOnSignalDetected;
     public MonoBehaviour callbackScript;
+    public MethodInfo CallbackCustomDistance;
+    public MonoBehaviour callbackCustomDistanceScript;
 
     // Callback names (the actually persistent information)
     [SerializeField]
     public string signalDetectionHandlerMethod;
     [SerializeField]
     public string signalDetectionMonobehaviorHandler;
+    // Custom Distance Callback names (the actually persistent information)
+    [SerializeField]
+    public string customDistanceHandlerMethod;
+    [SerializeField]
+    public string customDistanceMonobehaviorHandler;
 
     private float maxViewConeDistance;
 
@@ -63,7 +73,7 @@ public class Sensor : MonoBehaviour
     private SenseLink EvaluateVision(Signal signal)
     {
         // 1. if it's further than the largest view cone range + 1, don't even bother to process
-        Vector3 directionToSignal = signal.Transform.position - transform.position;
+        Vector3 directionToSignal = calculateDistanceFromSignal(signal);
         if (directionToSignal.magnitude > maxViewConeDistance + 1)
             return null; // too far to evaluate
 
@@ -88,6 +98,27 @@ public class Sensor : MonoBehaviour
         }
 
         return null;        
+    }
+
+    private Vector3 calculateDistanceFromSignal(Signal signal)
+    {
+        if (CustomDistanceCalculation)
+        {
+            if (callbackCustomDistanceScript != null && CallbackCustomDistance != null)
+            {
+                object[] parameters = new object[2];
+                parameters[0] = this;
+                parameters[1] = signal;
+                object result = this.CallbackCustomDistance.Invoke(callbackCustomDistanceScript, parameters);
+                if (result != null && result.GetType() == typeof(Vector3))
+                {
+                    return (Vector3)result;
+                }
+
+                Debug.LogWarning("Custom distance callback was not resolved or not called properly. Switching to default");
+            }
+        }
+        return DefaultDistanceCalculator.CalculateDistance(this, signal);
     }
 
     private SenseLink EvaluateHearing(Signal signal)
@@ -175,5 +206,24 @@ public class Sensor : MonoBehaviour
                 CallbackOnSignalDetected = callbackScript.GetType().GetMethods().Where(x => x.Name.Equals(signalDetectionHandlerMethod)).First();
             }
         }
+
+        if (customDistanceMonobehaviorHandler != "" && customDistanceHandlerMethod != "")
+        {
+            IEnumerable<MonoBehaviour> allCallbacks = gameObject.GetComponents<MonoBehaviour>().
+                Where(x => x.name == customDistanceMonobehaviorHandler || x.GetType().Name == customDistanceMonobehaviorHandler ||
+                x.GetType().BaseType.Name == customDistanceMonobehaviorHandler);
+
+            if (allCallbacks.Count() <= 0)
+            {
+                Debug.LogError("Custom Distance Callback " + customDistanceMonobehaviorHandler + "." +
+                                    customDistanceHandlerMethod + "() was not resolved!");
+            }
+            else {
+                callbackCustomDistanceScript = allCallbacks.First();
+
+                CallbackCustomDistance = callbackCustomDistanceScript.GetType().GetMethods().Where(x => x.Name.Equals(customDistanceHandlerMethod)).First();
+            }
+        }
     }
+
 }

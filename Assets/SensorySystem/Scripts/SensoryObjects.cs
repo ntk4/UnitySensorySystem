@@ -79,6 +79,7 @@ public class ViewCone
     {
         SceneColor = Color.red;
         SceneColor.a = 0.6f;
+        DrawCone = true;
     }
 
     public ViewCone(ViewCone coneToCopy)
@@ -244,5 +245,14 @@ public class SenseLink
         result *= FirstHand ? 1 : 2;
         //result *= awarenessLevel.GetHashCode();
         return result;
+    }
+   
+}
+
+public class DefaultDistanceCalculator
+{
+    public static Vector3 CalculateDistance(Sensor sensor, Signal signal)
+    {
+        return signal.Transform.position - sensor.gameObject.transform.position;
     }
 }

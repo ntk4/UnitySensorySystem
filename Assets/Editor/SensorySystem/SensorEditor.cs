@@ -21,11 +21,23 @@ public class SensorEditor : Editor
         sensor.CoolDownSeconds = EditorGUILayout.FloatField("Full Cooldown in seconds", sensor.CoolDownSeconds);
         AddCallbackGUI(sensor);
 
+        bool val = EditorGUILayout.Toggle("Custom Distance Calculation", sensor.CustomDistanceCalculation);
+        if (val != sensor.CustomDistanceCalculation)
+        {
+            Undo.RecordObject(sensor, "Custom Distance Calculation");
+            sensor.CustomDistanceCalculation = val;
+            MarkSceneDirty();
+        }
+
+        if (sensor.CustomDistanceCalculation)
+            AddCustomDistanceGUI(sensor);
+
+
         EditorGUILayout.Space();
 
         if (sensor.Sense == SenseType.Vision)
         {
-            bool val = EditorGUILayout.Toggle("Preview View Cones", sensor.DrawCones);
+            val = EditorGUILayout.Toggle("Preview View Cones", sensor.DrawCones);
             if (val != sensor.DrawCones)
             {
                 Undo.RecordObject(sensor, "Preview cones");
@@ -128,7 +140,7 @@ public class SensorEditor : Editor
     private void AddCallbackGUI(Sensor sensor)
     {
         //if (methods == null)
-        resolveMethods(sensor);
+        resolveCallbackMethods(sensor, typeof(SenseLink));
 
         if (sensor != null)
         {
@@ -147,28 +159,77 @@ public class SensorEditor : Editor
                 index = 0;
             }
 
-            if (methods != null && methods.Count > 0)
+            if (methods != null)
             {
-                int val = EditorGUILayout.Popup("Signal handler", index, 
-                    methods.Select(x => x.DeclaringType.Name + "." + x.Name).ToArray());
+                string[] validMethods = methods.Select(x => x.DeclaringType.Name + "." + x.Name).ToArray();
+                int val = EditorGUILayout.Popup("Signal handler", index, validMethods);
 
-                if (methods[val] != sensor.CallbackOnSignalDetected)
+                if (methods.Count > 0)
                 {
-                    //Undo.RecordObject(sensor, "Set Callback");
-                    //MarkSceneDirty();
-                    sensor.CallbackOnSignalDetected = methods[val];
-                }
+                    if (methods[val] != sensor.CallbackOnSignalDetected)
+                    {
+                        //Undo.RecordObject(sensor, "Set Callback");
+                        //MarkSceneDirty();
+                        sensor.CallbackOnSignalDetected = methods[val];
+                    }
 
-                if (sensor.CallbackOnSignalDetected != null)
-                {
-                    sensor.signalDetectionHandlerMethod = methods[val].Name;
-                    sensor.signalDetectionMonobehaviorHandler = methods[val].DeclaringType.Name;
+                    if (sensor.CallbackOnSignalDetected != null)
+                    {
+                        sensor.signalDetectionHandlerMethod = methods[val].Name;
+                        sensor.signalDetectionMonobehaviorHandler = methods[val].DeclaringType.Name;
+                    }
                 }
             }
         }
     }
 
-    private void resolveMethods(Sensor sensor)
+    private void AddCustomDistanceGUI(Sensor sensor)
+    {
+        //if (methods == null)
+        resolveDistanceCallbackMethods(sensor, typeof(Signal), typeof(Vector3));
+
+        if (sensor != null)
+        {
+            int index;
+
+            try
+            { // resolve the index of the already selected method, if any
+                index = methods
+                    .Select((v, i) => new { Method = v, Index = i })
+                    .First(x => x.Method == sensor.CallbackCustomDistance)
+                    .Index;
+            }
+            catch
+            {
+                //fallback, use the first
+                index = 0;
+            }
+
+            if (methods != null)
+            {
+                string[] validMethods = methods.Select(x => x.DeclaringType.Name + "." + x.Name).ToArray();
+                int val = EditorGUILayout.Popup("Distance callback", index, validMethods);
+
+                if (methods.Count > 0)
+                {
+                    if (methods[val] != sensor.CallbackCustomDistance)
+                    {
+                        //Undo.RecordObject(sensor, "Set Callback");
+                        //MarkSceneDirty();
+                        sensor.CallbackCustomDistance = methods[val];
+                    }
+
+                    if (sensor.CallbackCustomDistance != null)
+                    {
+                        sensor.customDistanceHandlerMethod = methods[val].Name;
+                        sensor.customDistanceMonobehaviorHandler = methods[val].DeclaringType.Name;
+                    }
+                }
+            }
+        }
+    }
+
+    private void resolveCallbackMethods(Sensor sensor, Type parameter)
     {
         methods = new List<MethodInfo>();
 
@@ -179,7 +240,29 @@ public class SensorEditor : Editor
             .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public) // Instance methods, both public and private/protected
             //.Where(x => x.DeclaringType == script.GetType()) // Do not only list methods defined in our own class, they may be in a super class
             .Where(x => x.GetParameters().Length == 1) // Make sure we only get methods with one arguments
-            .Where(x => x.GetParameters()[0].ParameterType == typeof(SenseLink)) // Make sure we only get methods with SenseLink argument
+            .Where(x => x.GetParameters()[0].ParameterType == parameter) // Make sure we only get methods with SenseLink argument
+            .Where(x => !ignoreMethods.Any(n => n == x.Name)) // Don't list methods in the ignoreMethods array (so we can exclude Unity specific methods, etc.)
+            //.Select(x => x)
+            .ToArray();
+
+            methods.AddRange(temp);
+        }
+    }
+
+    private void resolveDistanceCallbackMethods(Sensor sensor, Type parameter, Type returnType)
+    {
+        methods = new List<MethodInfo>();
+
+        MethodInfo[] temp;
+        foreach (MonoBehaviour script in sensor.gameObject.GetComponents<MonoBehaviour>())
+        {
+            temp = script.GetType()
+            .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public) // Instance methods, both public and private/protected
+            //.Where(x => x.DeclaringType == script.GetType()) // Do not only list methods defined in our own class, they may be in a super class
+            .Where(x => x.GetParameters().Length == 2) // Make sure we only get methods with two arguments
+            .Where(x => x.GetParameters()[0].ParameterType == typeof(Sensor)) // Make sure we only get methods with Sensor first argument
+            .Where(x => x.GetParameters()[1].ParameterType == parameter) // Make sure we only get methods with Signal second argument
+            .Where(x => x.ReturnType == returnType) 
             .Where(x => !ignoreMethods.Any(n => n == x.Name)) // Don't list methods in the ignoreMethods array (so we can exclude Unity specific methods, etc.)
             //.Select(x => x)
             .ToArray();

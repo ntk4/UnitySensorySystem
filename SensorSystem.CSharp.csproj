@@ -69,11 +69,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\UnitySensorySystem\Scripts\SensorHandler.cs" />
-    <Compile Include="Assets\UnitySensorySystem\SensorySystem\Scripts\Sensor.cs" />
-    <Compile Include="Assets\UnitySensorySystem\SensorySystem\Scripts\SensorManager.cs" />
-    <Compile Include="Assets\UnitySensorySystem\SensorySystem\Scripts\SensoryObjects.cs" />
-    <Compile Include="Assets\UnitySensorySystem\SensorySystem\Scripts\SignalObject.cs" />
+    <Compile Include="Assets\SensorySystem\Scripts\Sensor.cs" />
+    <Compile Include="Assets\SensorySystem\Scripts\SensorHandler.cs" />
+    <Compile Include="Assets\SensorySystem\Scripts\SensorManager.cs" />
+    <Compile Include="Assets\SensorySystem\Scripts\SensoryObjects.cs" />
+    <Compile Include="Assets\SensorySystem\Scripts\SignalObject.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Standard Assets\Characters\FirstPersonCharacter\FirstPersonCharacterGuidelines.txt" />

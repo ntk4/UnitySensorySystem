@@ -5,19 +5,25 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
 
-public class Sensor : MonoBehaviour
+[Serializable]
+public class Sensor 
 {
     public SenseType Sense;
     
+    //[SerializeField]
     public List<ViewCone> ViewCones = new List<ViewCone>();
-    
+
+    //[SerializeField]
     public bool DrawCones = true;
 
     public Alertness CurrentAlertnessLevel;
 
+    //[SerializeField]
     public float CoolDownSeconds;
 
     public bool CustomDistanceCalculation = false;
+
+    public Vector3 Position, Forward; // position interface
     
     // Callbacks
     public MethodInfo CallbackOnSignalDetected;
@@ -26,37 +32,20 @@ public class Sensor : MonoBehaviour
     public MonoBehaviour callbackCustomDistanceScript;
 
     // Callback names (the actually persistent information)
-    [SerializeField]
+    //[SerializeField]
     public string signalDetectionHandlerMethod;
-    [SerializeField]
+    //[SerializeField]
     public string signalDetectionMonobehaviorHandler;
     // Custom Distance Callback names (the actually persistent information)
-    [SerializeField]
+    //[SerializeField]
     public string customDistanceHandlerMethod;
-    [SerializeField]
+    //[SerializeField]
     public string customDistanceMonobehaviorHandler;
 
     private float maxViewConeDistance;
 
     private RaycastHit hit;
     private Ray ray;
-
-    private int RegistrationNumber;
-    private SensorManager sensorManager;
-
-    void Start()
-    {
-        sensorManager = GameObject.Find("SensorManager").GetComponent<SensorManager>();
-        RegistrationNumber = sensorManager.RegisterSensor(this);
-        recalculateMaxViewConeDistance();
-
-        ResolveCallbacks();
-    }
-
-    void OnDisable()
-    {
-        sensorManager.UnregisterSensor(RegistrationNumber);
-    }
 
     public SenseLink Evaluate(Signal signal)
     {
@@ -82,7 +71,7 @@ public class Sensor : MonoBehaviour
         Awareness temp;
         foreach (ViewCone vc in ViewCones)
         {
-            temp = vc.EvaluateSignal(transform.position, transform.forward, signal);
+            temp = vc.EvaluateSignal(Position, Forward, signal);
             if ((int)temp > (int)maxAwarenessForSignal)
                 maxAwarenessForSignal = temp;
         }
@@ -90,7 +79,7 @@ public class Sensor : MonoBehaviour
         // 3. If the signal is in a view cone raycast to see if it's visible
         if ((int)maxAwarenessForSignal > (int)Awareness.None)
         {
-            if (Physics.Raycast(transform.position, directionToSignal, out hit))
+            if (Physics.Raycast(Position, directionToSignal, out hit))
             {
                 if (hit.transform.position.Equals(signal.Transform.position)) //hit the signal, nothing in between
                     return new SenseLink(Time.time, signal, maxAwarenessForSignal, true, signal.Sense);
@@ -176,7 +165,7 @@ public class Sensor : MonoBehaviour
         }
     }
 
-    private void recalculateMaxViewConeDistance()
+    public void recalculateMaxViewConeDistance()
     {
         float maxDistance = 0;
         foreach(ViewCone vc in ViewCones)
@@ -188,42 +177,5 @@ public class Sensor : MonoBehaviour
         maxViewConeDistance = maxDistance;
     }
 
-    public void ResolveCallbacks()
-    {
-        if (signalDetectionMonobehaviorHandler != "" && signalDetectionHandlerMethod != "")
-        {
-            IEnumerable<MonoBehaviour> allCallbacks = gameObject.GetComponents<MonoBehaviour>().
-                Where(x => x.name == signalDetectionMonobehaviorHandler || x.GetType().Name == signalDetectionMonobehaviorHandler ||
-                x.GetType().BaseType.Name == signalDetectionMonobehaviorHandler);
-
-            if (allCallbacks.Count() <= 0)
-            {
-                Debug.LogError("Sensor Callback " + signalDetectionMonobehaviorHandler + "." +
-                                    signalDetectionHandlerMethod + "() was not resolved!");
-            } else {
-                callbackScript = allCallbacks.First();
-
-                CallbackOnSignalDetected = callbackScript.GetType().GetMethods().Where(x => x.Name.Equals(signalDetectionHandlerMethod)).First();
-            }
-        }
-
-        if (customDistanceMonobehaviorHandler != "" && customDistanceHandlerMethod != "")
-        {
-            IEnumerable<MonoBehaviour> allCallbacks = gameObject.GetComponents<MonoBehaviour>().
-                Where(x => x.name == customDistanceMonobehaviorHandler || x.GetType().Name == customDistanceMonobehaviorHandler ||
-                x.GetType().BaseType.Name == customDistanceMonobehaviorHandler);
-
-            if (allCallbacks.Count() <= 0)
-            {
-                Debug.LogError("Custom Distance Callback " + customDistanceMonobehaviorHandler + "." +
-                                    customDistanceHandlerMethod + "() was not resolved!");
-            }
-            else {
-                callbackCustomDistanceScript = allCallbacks.First();
-
-                CallbackCustomDistance = callbackCustomDistanceScript.GetType().GetMethods().Where(x => x.Name.Equals(customDistanceHandlerMethod)).First();
-            }
-        }
-    }
 
 }

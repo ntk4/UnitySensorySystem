@@ -71,8 +71,9 @@ public class ViewCone
     }
     [SerializeField]
     private Awareness awarenessLevel;
-
+    [SerializeField]
     public Color SceneColor;
+    [SerializeField]
     public bool DrawCone;
 
     public ViewCone()
@@ -253,6 +254,6 @@ public class DefaultDistanceCalculator
 {
     public static Vector3 CalculateDistance(Sensor sensor, Signal signal)
     {
-        return signal.Transform.position - sensor.gameObject.transform.position;
+        return signal.Transform.position - sensor.Position;
     }
 }

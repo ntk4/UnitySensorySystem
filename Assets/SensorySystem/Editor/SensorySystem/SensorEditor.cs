@@ -7,7 +7,7 @@ using System.Reflection;
 using System;
 using UnityEditor.SceneManagement;
 
-[CustomEditor(typeof(Sensor))]
+[CustomEditor(typeof(SensorObject))]
 public class SensorEditor : Editor
 {
     static List<MethodInfo> methods;
@@ -15,110 +15,112 @@ public class SensorEditor : Editor
 
     public override void OnInspectorGUI()
     {
-        Sensor sensor = (Sensor)target;
+        SensorObject sensorObj = (SensorObject)target;
+        if (sensorObj.sensor == null)
+            return;
 
-        sensor.Sense = (SenseType)EditorGUILayout.EnumPopup("Sense type", sensor.Sense);
-        sensor.CoolDownSeconds = EditorGUILayout.FloatField("Full Cooldown in seconds", sensor.CoolDownSeconds);
-        AddCallbackGUI(sensor);
+        sensorObj.sensor.Sense = (SenseType)EditorGUILayout.EnumPopup("Sense type", sensorObj.sensor.Sense);
+        sensorObj.sensor.CoolDownSeconds = EditorGUILayout.FloatField("Full Cooldown in seconds", sensorObj.sensor.CoolDownSeconds);
+        AddCallbackGUI(sensorObj);
 
-        bool val = EditorGUILayout.Toggle("Custom Distance Calculation", sensor.CustomDistanceCalculation);
-        if (val != sensor.CustomDistanceCalculation)
+        bool val = EditorGUILayout.Toggle("Custom Distance Calculation", sensorObj.sensor.CustomDistanceCalculation);
+        if (val != sensorObj.sensor.CustomDistanceCalculation)
         {
-            Undo.RecordObject(sensor, "Custom Distance Calculation");
-            sensor.CustomDistanceCalculation = val;
+            Undo.RecordObject(sensorObj, "Custom Distance Calculation");
+            sensorObj.sensor.CustomDistanceCalculation = val;
             MarkSceneDirty();
         }
 
-        if (sensor.CustomDistanceCalculation)
-            AddCustomDistanceGUI(sensor);
+        if (sensorObj.sensor.CustomDistanceCalculation)
+            AddCustomDistanceGUI(sensorObj);
 
 
         EditorGUILayout.Space();
 
-        if (sensor.Sense == SenseType.Vision)
+        if (sensorObj.sensor.Sense == SenseType.Vision)
         {
-            val = EditorGUILayout.Toggle("Preview View Cones", sensor.DrawCones);
-            if (val != sensor.DrawCones)
+            val = EditorGUILayout.Toggle("Preview View Cones", sensorObj.sensor.DrawCones);
+            if (val != sensorObj.sensor.DrawCones)
             {
-                Undo.RecordObject(sensor, "Preview cones");
-                sensor.DrawCones = val;
+                Undo.RecordObject(sensorObj, "Preview cones");
+                sensorObj.sensor.DrawCones = val;
                 MarkSceneDirty();
                 SceneView.RepaintAll();
             }
 
             if (GUILayout.Button("Add new View Cone"))
             {
-                Undo.RecordObject(sensor, "Add new View Cone");
-                sensor.AddViewCone();
+                Undo.RecordObject(sensorObj, "Add new View Cone");
+                sensorObj.sensor.AddViewCone();
                 MarkSceneDirty();
                 SceneView.RepaintAll();
             }
-            if (sensor.ViewCones != null)
+            if (sensorObj.sensor.ViewCones != null)
             {
-                for (int i = 0; i < sensor.ViewCones.Count; i++)
+                for (int i = 0; i < sensorObj.sensor.ViewCones.Count; i++)
                 {
                     EditorGUILayout.Space();
                     EditorGUILayout.LabelField("View Cone " + (i + 1), EditorStyles.boldLabel);
 
-                    int value = EditorGUILayout.IntSlider("FoV (degrees)", sensor.ViewCones[i].FoVAngle, 0, 180);
-                    if (value != sensor.ViewCones[i].FoVAngle)
+                    int value = EditorGUILayout.IntSlider("FoV (degrees)", sensorObj.sensor.ViewCones[i].FoVAngle, 0, 180);
+                    if (value != sensorObj.sensor.ViewCones[i].FoVAngle)
                     {
-                        Undo.RecordObject(sensor, "Change View Cone");
+                        Undo.RecordObject(sensorObj, "Change View Cone");
                         MarkSceneDirty();
-                        sensor.ViewCones[i].FoVAngle = value;
+                        sensorObj.sensor.ViewCones[i].FoVAngle = value;
                         SceneView.RepaintAll();
                     }
 
-                    value = EditorGUILayout.IntSlider("Range of sight", (int)sensor.ViewCones[i].Range, 0, 15);
-                    if (value != sensor.ViewCones[i].Range)
+                    value = EditorGUILayout.IntSlider("Range of sight", (int)sensorObj.sensor.ViewCones[i].Range, 0, 15);
+                    if (value != sensorObj.sensor.ViewCones[i].Range)
                     {
-                        Undo.RecordObject(sensor, "Change View Cone");
+                        Undo.RecordObject(sensorObj, "Change View Cone");
                         MarkSceneDirty();
-                        sensor.ViewCones[i].Range = value;
+                        sensorObj.sensor.ViewCones[i].Range = value;
                         SceneView.RepaintAll();
                     }
 
-                    Awareness aw = (Awareness)EditorGUILayout.EnumPopup("Awareness Level", sensor.ViewCones[i].AwarenessLevel);
-                    if (aw != sensor.ViewCones[i].AwarenessLevel)
+                    Awareness aw = (Awareness)EditorGUILayout.EnumPopup("Awareness Level", sensorObj.sensor.ViewCones[i].AwarenessLevel);
+                    if (aw != sensorObj.sensor.ViewCones[i].AwarenessLevel)
                     {
-                        Undo.RecordObject(sensor, "Change View Cone");
+                        Undo.RecordObject(sensorObj, "Change View Cone");
                         MarkSceneDirty();
-                        sensor.ViewCones[i].AwarenessLevel = aw;
+                        sensorObj.sensor.ViewCones[i].AwarenessLevel = aw;
                         SceneView.RepaintAll();
                     }
 
-                    value = EditorGUILayout.IntSlider("Horizontal Offset", sensor.ViewCones[i].HorizontalOffset, 0, 360);
-                    if (value != sensor.ViewCones[i].HorizontalOffset)
+                    value = EditorGUILayout.IntSlider("Horizontal Offset", sensorObj.sensor.ViewCones[i].HorizontalOffset, 0, 360);
+                    if (value != sensorObj.sensor.ViewCones[i].HorizontalOffset)
                     {
-                        Undo.RecordObject(sensor, "Change View Cone");
+                        Undo.RecordObject(sensorObj, "Change View Cone");
                         MarkSceneDirty();
-                        sensor.ViewCones[i].HorizontalOffset = value;
+                        sensorObj.sensor.ViewCones[i].HorizontalOffset = value;
                         SceneView.RepaintAll();
                     }
 
-                    value = EditorGUILayout.IntSlider("Recognition delay", sensor.ViewCones[i].RecognitionDelayFrames, 0, 60);
-                    if (value != sensor.ViewCones[i].RecognitionDelayFrames)
+                    value = EditorGUILayout.IntSlider("Recognition delay", sensorObj.sensor.ViewCones[i].RecognitionDelayFrames, 0, 60);
+                    if (value != sensorObj.sensor.ViewCones[i].RecognitionDelayFrames)
                     {
-                        Undo.RecordObject(sensor, "Change Recognition delay");
+                        Undo.RecordObject(sensorObj, "Change Recognition delay");
                         MarkSceneDirty();
-                        sensor.ViewCones[i].RecognitionDelayFrames = value;
+                        sensorObj.sensor.ViewCones[i].RecognitionDelayFrames = value;
                         SceneView.RepaintAll();
                     }
 
-                    Color col = EditorGUILayout.ColorField("Scene color", sensor.ViewCones[i].SceneColor);
-                    if (col != sensor.ViewCones[i].SceneColor)
+                    Color col = EditorGUILayout.ColorField("Scene color", sensorObj.sensor.ViewCones[i].SceneColor);
+                    if (col != sensorObj.sensor.ViewCones[i].SceneColor)
                     {
-                        Undo.RecordObject(sensor, "Change View Cone");
+                        Undo.RecordObject(sensorObj, "Change View Cone");
                         MarkSceneDirty();
-                        sensor.ViewCones[i].SceneColor = col;
+                        sensorObj.sensor.ViewCones[i].SceneColor = col;
                         SceneView.RepaintAll();
                     }
 
-                    bool drawCone = EditorGUILayout.Toggle("Draw", sensor.ViewCones[i].DrawCone);
-                    if (drawCone != sensor.ViewCones[i].DrawCone)
+                    bool drawCone = EditorGUILayout.Toggle("Draw", sensorObj.sensor.ViewCones[i].DrawCone);
+                    if (drawCone != sensorObj.sensor.ViewCones[i].DrawCone)
                     {
-                        Undo.RecordObject(sensor, (drawCone ? "Enable" : "Disable") + " Draw Cone");
-                        sensor.ViewCones[i].DrawCone = drawCone;
+                        Undo.RecordObject(sensorObj, (drawCone ? "Enable" : "Disable") + " Draw Cone");
+                        sensorObj.sensor.ViewCones[i].DrawCone = drawCone;
                         MarkSceneDirty();
                         SceneView.RepaintAll();
                     }
@@ -126,8 +128,8 @@ public class SensorEditor : Editor
 
                     if (GUILayout.Button("Remove"))
                     {
-                        Undo.RecordObject(sensor, "Remove View Cone");
-                        sensor.RemoveViewCone(i);
+                        Undo.RecordObject(sensorObj, "Remove View Cone");
+                        sensorObj.sensor.RemoveViewCone(i);
                         MarkSceneDirty();
                         SceneView.RepaintAll();
                     }
@@ -137,12 +139,12 @@ public class SensorEditor : Editor
         
     }
 
-    private void AddCallbackGUI(Sensor sensor)
+    private void AddCallbackGUI(SensorObject sensorObj)
     {
         //if (methods == null)
-        resolveCallbackMethods(sensor, typeof(SenseLink));
+        resolveCallbackMethods(sensorObj, typeof(SenseLink));
 
-        if (sensor != null)
+        if (sensorObj.sensor != null)
         {
             int index;
 
@@ -150,7 +152,7 @@ public class SensorEditor : Editor
             { // resolve the index of the already selected method, if any
                 index = methods
                     .Select((v, i) => new { Method = v, Index = i })
-                    .First(x => x.Method == sensor.CallbackOnSignalDetected)
+                    .First(x => x.Method == sensorObj.sensor.CallbackOnSignalDetected)
                     .Index;
             }
             catch
@@ -164,31 +166,31 @@ public class SensorEditor : Editor
                 string[] validMethods = methods.Select(x => x.DeclaringType.Name + "." + x.Name).ToArray();
                 int val = EditorGUILayout.Popup("Signal handler", index, validMethods);
 
-                if (methods.Count > 0)
+                if (methods.Count > val)
                 {
-                    if (methods[val] != sensor.CallbackOnSignalDetected)
+                    if (methods[val] != sensorObj.sensor.CallbackOnSignalDetected)
                     {
                         //Undo.RecordObject(sensor, "Set Callback");
                         //MarkSceneDirty();
-                        sensor.CallbackOnSignalDetected = methods[val];
+                        sensorObj.sensor.CallbackOnSignalDetected = methods[val];
                     }
 
-                    if (sensor.CallbackOnSignalDetected != null)
+                    if (sensorObj.sensor.CallbackOnSignalDetected != null)
                     {
-                        sensor.signalDetectionHandlerMethod = methods[val].Name;
-                        sensor.signalDetectionMonobehaviorHandler = methods[val].DeclaringType.Name;
+                        sensorObj.sensor.signalDetectionHandlerMethod = methods[val].Name;
+                        sensorObj.sensor.signalDetectionMonobehaviorHandler = methods[val].DeclaringType.Name;
                     }
                 }
             }
         }
     }
 
-    private void AddCustomDistanceGUI(Sensor sensor)
+    private void AddCustomDistanceGUI(SensorObject sensorObj)
     {
         //if (methods == null)
-        resolveDistanceCallbackMethods(sensor, typeof(Signal), typeof(Vector3));
+        resolveDistanceCallbackMethods(sensorObj, typeof(Signal), typeof(Vector3));
 
-        if (sensor != null)
+        if (sensorObj.sensor != null)
         {
             int index;
 
@@ -196,7 +198,7 @@ public class SensorEditor : Editor
             { // resolve the index of the already selected method, if any
                 index = methods
                     .Select((v, i) => new { Method = v, Index = i })
-                    .First(x => x.Method == sensor.CallbackCustomDistance)
+                    .First(x => x.Method == sensorObj.sensor.CallbackCustomDistance)
                     .Index;
             }
             catch
@@ -210,31 +212,31 @@ public class SensorEditor : Editor
                 string[] validMethods = methods.Select(x => x.DeclaringType.Name + "." + x.Name).ToArray();
                 int val = EditorGUILayout.Popup("Distance callback", index, validMethods);
 
-                if (methods.Count > 0)
+                if (methods.Count > val)
                 {
-                    if (methods[val] != sensor.CallbackCustomDistance)
+                    if (methods[val] != sensorObj.sensor.CallbackCustomDistance)
                     {
                         //Undo.RecordObject(sensor, "Set Callback");
                         //MarkSceneDirty();
-                        sensor.CallbackCustomDistance = methods[val];
+                        sensorObj.sensor.CallbackCustomDistance = methods[val];
                     }
 
-                    if (sensor.CallbackCustomDistance != null)
+                    if (sensorObj.sensor.CallbackCustomDistance != null)
                     {
-                        sensor.customDistanceHandlerMethod = methods[val].Name;
-                        sensor.customDistanceMonobehaviorHandler = methods[val].DeclaringType.Name;
+                        sensorObj.sensor.customDistanceHandlerMethod = methods[val].Name;
+                        sensorObj.sensor.customDistanceMonobehaviorHandler = methods[val].DeclaringType.Name;
                     }
                 }
             }
         }
     }
 
-    private void resolveCallbackMethods(Sensor sensor, Type parameter)
+    private void resolveCallbackMethods(SensorObject sensorObj, Type parameter)
     {
         methods = new List<MethodInfo>();
 
         MethodInfo[] temp;
-        foreach (MonoBehaviour script in sensor.gameObject.GetComponents<MonoBehaviour>())
+        foreach (MonoBehaviour script in sensorObj.gameObject.GetComponents<MonoBehaviour>())
         {
             temp = script.GetType()
             .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public) // Instance methods, both public and private/protected
@@ -249,12 +251,12 @@ public class SensorEditor : Editor
         }
     }
 
-    private void resolveDistanceCallbackMethods(Sensor sensor, Type parameter, Type returnType)
+    private void resolveDistanceCallbackMethods(SensorObject sensorObj, Type parameter, Type returnType)
     {
         methods = new List<MethodInfo>();
 
         MethodInfo[] temp;
-        foreach (MonoBehaviour script in sensor.gameObject.GetComponents<MonoBehaviour>())
+        foreach (MonoBehaviour script in sensorObj.gameObject.GetComponents<MonoBehaviour>())
         {
             temp = script.GetType()
             .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public) // Instance methods, both public and private/protected
@@ -273,22 +275,28 @@ public class SensorEditor : Editor
 
     void OnSceneGUI()
     {
-        Sensor sensor = (Sensor)target;
+        SensorObject sensorObj = (SensorObject)target;
 
-        if (!sensor.DrawCones || !sensor.enabled)
+        if (sensorObj == null || !sensorObj.enabled)
             return;
 
-        if (sensor.ViewCones == null)
+        if (sensorObj.sensor == null)
+            sensorObj.sensor = new Sensor();
+
+        if (!sensorObj.sensor.DrawCones)
             return;
 
-        for (int i = 0; i < sensor.ViewCones.Count; i++)
+        if (sensorObj.sensor.ViewCones == null)
+            return;
+
+        for (int i = 0; i < sensorObj.sensor.ViewCones.Count; i++)
         {
-            ViewCone vc = sensor.ViewCones[i];
+            ViewCone vc = sensorObj.sensor.ViewCones[i];
             if (vc.DrawCone)
             {
                 Handles.color = vc.SceneColor;
-                Handles.DrawSolidArc(sensor.transform.position, sensor.transform.up,
-                        Quaternion.Euler(0, -vc.FoVAngle * 0.5f + vc.HorizontalOffset, 0) * sensor.transform.forward,
+                Handles.DrawSolidArc(sensorObj.transform.position, sensorObj.transform.up,
+                        Quaternion.Euler(0, -vc.FoVAngle * 0.5f + vc.HorizontalOffset, 0) * sensorObj.transform.forward,
                         vc.FoVAngle, vc.Range);
             }
         }

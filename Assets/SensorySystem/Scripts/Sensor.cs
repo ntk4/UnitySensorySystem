@@ -22,8 +22,11 @@ public class Sensor
     public float CoolDownSeconds;
 
     public bool CustomDistanceCalculation = false;
-
+    
     public Vector3 Position, Forward; // position interface
+
+    [Tooltip("Layer mask to ignore when raycasting. Usually the layer where the sensor object belongs to")]
+    public LayerMask LayerMask;
     
     // Callbacks
     public MethodInfo CallbackOnSignalDetected;
@@ -32,9 +35,9 @@ public class Sensor
     public MonoBehaviour callbackCustomDistanceScript;
 
     // Callback names (the actually persistent information)
-    //[SerializeField]
+    [SerializeField]
     public string signalDetectionHandlerMethod;
-    //[SerializeField]
+    [SerializeField]
     public string signalDetectionMonobehaviorHandler;
     // Custom Distance Callback names (the actually persistent information)
     //[SerializeField]
@@ -79,7 +82,7 @@ public class Sensor
         // 3. If the signal is in a view cone raycast to see if it's visible
         if ((int)maxAwarenessForSignal > (int)Awareness.None)
         {
-            if (Physics.Raycast(Position, directionToSignal, out hit))
+            if (Physics.Raycast(Position, directionToSignal, out hit, Mathf.Infinity, LayerMask.value))
             {
                 if (hit.transform.position.Equals(signal.Transform.position)) //hit the signal, nothing in between
                     return new SenseLink(Time.time, signal, maxAwarenessForSignal, true, signal.Sense);

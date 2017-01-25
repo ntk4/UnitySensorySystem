@@ -21,6 +21,15 @@ public class SensorObject : MonoBehaviour {
         ResolveCallbacks();
     }
 
+    void Update()
+    {
+        if (sensor != null)
+        {
+            sensor.Position = transform.position;
+            sensor.Forward = transform.forward;
+        }
+    }
+
     void OnDisable()
     {
         sensorManager.UnregisterSensor(RegistrationNumber);

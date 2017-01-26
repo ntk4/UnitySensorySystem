@@ -84,6 +84,7 @@
     <Compile Include="Assets\SensorySystem\Scripts\Sensor.cs" />
     <Compile Include="Assets\SensorySystem\Scripts\SensorHandler.cs" />
     <Compile Include="Assets\SensorySystem\Scripts\SensorManager.cs" />
+    <Compile Include="Assets\SensorySystem\Scripts\SensorManagerObject.cs" />
     <Compile Include="Assets\SensorySystem\Scripts\SensorObject.cs" />
     <Compile Include="Assets\SensorySystem\Scripts\SensoryObjects.cs" />
     <Compile Include="Assets\SensorySystem\Scripts\SignalObject.cs" />

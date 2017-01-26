@@ -22,14 +22,14 @@ public class SignalObject : MonoBehaviour {
     public bool AudioSignalAttenuatedByObstacles = false;
 
     private Signal signal;
-    private SensorManager manager;
+    private SensorManagerObject manager;
     private int signalIndex = -1;
 
     void Start()
     {
-        Object obj = FindObjectOfType(typeof(SensorManager));
+        Object obj = FindObjectOfType(typeof(SensorManagerObject));
         if (obj != null)
-            manager = (SensorManager)obj;
+            manager = (SensorManagerObject)obj;
         resetSignal();
     }
 

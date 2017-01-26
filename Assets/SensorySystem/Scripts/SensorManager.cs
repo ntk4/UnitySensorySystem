@@ -1,37 +1,27 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class SensorManager : MonoBehaviour
+public class SensorManager
 {
-    public int FramesDelay;
     private int FramesSinceLastExecution;
 
-    private Dictionary<int, Sensor> sensors;
-    private int nextSensorIndex;
+    private Dictionary<int, Sensor> sensors = new Dictionary<int, Sensor>();
+    private int nextSensorIndex = 0;
 
-    private Dictionary<int, Signal> signals;
-    private int nextSignalIndex;
+    private Dictionary<int, Signal> signals = new Dictionary<int, Signal>();
+    private int nextSignalIndex = 0;
 
 
     /// <summary>
     /// Maintains the SenseLinks per Sensor Index. The key corresponds to the key of sensors dictionary.
     /// </summary>
-    private Dictionary<int, List<SenseLink>> sensorLinks;
+    private Dictionary<int, List<SenseLink>> sensorLinks = new Dictionary<int, List<SenseLink>>();
 
     Signal iterSignal;
     Sensor iterSensor;
     List<SenseLink> iterSenseLinks;
 
-    void Awake()
-    {
-        nextSensorIndex = 0;
-        nextSignalIndex = 0;
-        sensors = new Dictionary<int, Sensor>();
-        signals = new Dictionary<int, Signal>();
-        sensorLinks = new Dictionary<int, List<SenseLink>>();
-    }
-
-    void Update()
+    public void Update(int FramesDelay)
     {
         if (FramesSinceLastExecution++ >= FramesDelay)
         {

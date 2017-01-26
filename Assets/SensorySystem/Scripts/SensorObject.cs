@@ -11,7 +11,7 @@ public class SensorObject : MonoBehaviour {
 
     private int RegistrationNumber;
 
-    public SensorManager sensorManager;
+    public SensorManagerObject sensorManager;
 
     // Callback names (the actually persistent information)
     [SerializeField]
@@ -26,7 +26,7 @@ public class SensorObject : MonoBehaviour {
 
     void Start()
     {
-        sensorManager = GameObject.Find("SensorManager").GetComponent<SensorManager>();
+        sensorManager = GameObject.Find("SensorManager").GetComponent<SensorManagerObject>();
         RegistrationNumber = sensorManager.RegisterSensor(sensor);
         sensor.recalculateMaxViewConeDistance();
 

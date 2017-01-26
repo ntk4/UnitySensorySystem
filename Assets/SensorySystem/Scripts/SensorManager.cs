@@ -102,10 +102,8 @@ public class SensorManager : MonoBehaviour
         }
 
         SenseLink link = iterSensor.Evaluate(iterSignal);
-        if (link != null && iterSensor.CallbackOnSignalDetected != null)
+        if (link != null && iterSensor.delegateSignalDetected != null)
         {
-            object[] parameters = new object[1];
-
             //1. Find the SenseLink in the memory of the particular sensor
             int memoryLinkIndex = memoryLinks.IndexOf(link);
 
@@ -129,9 +127,8 @@ public class SensorManager : MonoBehaviour
                 memoryLinks.Add(link);
                 sensorLinks[sensorkey] = memoryLinks;
             }
-
-            parameters[0] = link;
-            iterSensor.CallbackOnSignalDetected.Invoke(iterSensor.callbackScript, parameters);
+            
+            iterSensor.delegateSignalDetected.Invoke(link);
         }
     }
 

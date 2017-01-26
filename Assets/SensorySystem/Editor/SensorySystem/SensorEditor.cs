@@ -159,13 +159,15 @@ public class SensorEditor : Editor
 
         if (sensorObj.sensor != null)
         {
-            int index;
+            int index = 0;
+            MethodInfo methodInfo = sensorObj.sensor.delegateSignalDetected != null ? sensorObj.sensor.delegateSignalDetected.Method : null;
 
+            if (methodInfo != null)
             try
             { // resolve the index of the already selected method, if any
                 index = methods
                     .Select((v, i) => new { Method = v, Index = i })
-                    .First(x => x.Method == sensorObj.sensor.CallbackOnSignalDetected)
+                    .First(x => x.Method == methodInfo)
                     .Index;
             }
             catch
@@ -181,17 +183,17 @@ public class SensorEditor : Editor
 
                 if (methods.Count > val)
                 {
-                    if (methods[val] != sensorObj.sensor.CallbackOnSignalDetected)
+                    if (methods[val] != methodInfo)
                     {
                         //Undo.RecordObject(sensor, "Set Callback");
                         //MarkSceneDirty();
-                        sensorObj.sensor.CallbackOnSignalDetected = methods[val];
+                        methodInfo = methods[val];
                     }
 
-                    if (sensorObj.sensor.CallbackOnSignalDetected != null)
+                    if (methodInfo != null)
                     {
-                        sensorObj.sensor.signalDetectionHandlerMethod = methods[val].Name;
-                        sensorObj.sensor.signalDetectionMonobehaviorHandler = methods[val].DeclaringType.Name;
+                        sensorObj.signalDetectionHandlerMethod = methods[val].Name;
+                        sensorObj.signalDetectionMonobehaviorHandler = methods[val].DeclaringType.Name;
                     }
                 }
             }
@@ -205,13 +207,14 @@ public class SensorEditor : Editor
 
         if (sensorObj.sensor != null)
         {
-            int index;
+            int index = 0;
+            MethodInfo methodInfo = sensorObj.sensor.delegateDistanceCalculation != null ? sensorObj.sensor.delegateDistanceCalculation.Method : null;
 
             try
             { // resolve the index of the already selected method, if any
                 index = methods
                     .Select((v, i) => new { Method = v, Index = i })
-                    .First(x => x.Method == sensorObj.sensor.CallbackCustomDistance)
+                    .First(x => x.Method == methodInfo)
                     .Index;
             }
             catch
@@ -227,17 +230,17 @@ public class SensorEditor : Editor
 
                 if (methods.Count > val)
                 {
-                    if (methods[val] != sensorObj.sensor.CallbackCustomDistance)
+                    if (methods[val] != methodInfo)
                     {
                         //Undo.RecordObject(sensor, "Set Callback");
                         //MarkSceneDirty();
-                        sensorObj.sensor.CallbackCustomDistance = methods[val];
+                        methodInfo = methods[val];
                     }
 
-                    if (sensorObj.sensor.CallbackCustomDistance != null)
+                    if (methodInfo != null)
                     {
-                        sensorObj.sensor.customDistanceHandlerMethod = methods[val].Name;
-                        sensorObj.sensor.customDistanceMonobehaviorHandler = methods[val].DeclaringType.Name;
+                        sensorObj.customDistanceHandlerMethod = methods[val].Name;
+                        sensorObj.customDistanceMonobehaviorHandler = methods[val].DeclaringType.Name;
                     }
                 }
             }

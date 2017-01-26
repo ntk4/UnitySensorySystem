@@ -29,21 +29,11 @@ public class Sensor
     public LayerMask LayerMask;
     
     // Callbacks
-    public MethodInfo CallbackOnSignalDetected;
-    public MonoBehaviour callbackScript;
-    public MethodInfo CallbackCustomDistance;
-    public MonoBehaviour callbackCustomDistanceScript;
+    public delegate void DelegateSignalDetected(SenseLink senseLink);
+    public DelegateSignalDetected delegateSignalDetected;
+    public delegate Vector3 DelegateDistanceCalculation(Sensor sensor, Signal signal);
+    public DelegateDistanceCalculation delegateDistanceCalculation;
 
-    // Callback names (the actually persistent information)
-    [SerializeField]
-    public string signalDetectionHandlerMethod;
-    [SerializeField]
-    public string signalDetectionMonobehaviorHandler;
-    // Custom Distance Callback names (the actually persistent information)
-    //[SerializeField]
-    public string customDistanceHandlerMethod;
-    //[SerializeField]
-    public string customDistanceMonobehaviorHandler;
 
     private float maxViewConeDistance;
 
@@ -96,12 +86,9 @@ public class Sensor
     {
         if (CustomDistanceCalculation)
         {
-            if (callbackCustomDistanceScript != null && CallbackCustomDistance != null)
+            if (delegateDistanceCalculation != null)
             {
-                object[] parameters = new object[2];
-                parameters[0] = this;
-                parameters[1] = signal;
-                object result = this.CallbackCustomDistance.Invoke(callbackCustomDistanceScript, parameters);
+                object result = delegateDistanceCalculation.Invoke(this, signal);
                 if (result != null && result.GetType() == typeof(Vector3))
                 {
                     return (Vector3)result;

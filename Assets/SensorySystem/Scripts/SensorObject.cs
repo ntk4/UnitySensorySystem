@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
+using System;
 
 public class SensorObject : MonoBehaviour {
 
@@ -11,6 +12,17 @@ public class SensorObject : MonoBehaviour {
     private int RegistrationNumber;
 
     public SensorManager sensorManager;
+
+    // Callback names (the actually persistent information)
+    [SerializeField]
+    public string signalDetectionHandlerMethod;
+    [SerializeField]
+    public string signalDetectionMonobehaviorHandler;
+    // Custom Distance Callback names (the actually persistent information)
+    //[SerializeField]
+    public string customDistanceHandlerMethod;
+    //[SerializeField]
+    public string customDistanceMonobehaviorHandler;
 
     void Start()
     {
@@ -37,39 +49,42 @@ public class SensorObject : MonoBehaviour {
 
     public void ResolveCallbacks()
     {
-        if (sensor.signalDetectionMonobehaviorHandler != "" && sensor.signalDetectionHandlerMethod != "")
+        if (signalDetectionMonobehaviorHandler != "" && signalDetectionHandlerMethod != "")
         {
             IEnumerable<MonoBehaviour> allCallbacks = gameObject.GetComponents<MonoBehaviour>().
-                Where(x => x.name == sensor.signalDetectionMonobehaviorHandler || x.GetType().Name == sensor.signalDetectionMonobehaviorHandler ||
-                x.GetType().BaseType.Name == sensor.signalDetectionMonobehaviorHandler);
+                Where(x => x.name == signalDetectionMonobehaviorHandler || x.GetType().Name == signalDetectionMonobehaviorHandler ||
+                x.GetType().BaseType.Name == signalDetectionMonobehaviorHandler);
 
             if (allCallbacks.Count() <= 0)
             {
-                Debug.LogError("Sensor Callback " + sensor.signalDetectionMonobehaviorHandler + "." +
-                                    sensor.signalDetectionHandlerMethod + "() was not resolved!");
+                Debug.LogError("Sensor Callback " + signalDetectionMonobehaviorHandler + "." +
+                                    signalDetectionHandlerMethod + "() was not resolved!");
             }
             else {
-                sensor.callbackScript = allCallbacks.First();
-
-                sensor.CallbackOnSignalDetected = sensor.callbackScript.GetType().GetMethods().Where(x => x.Name.Equals(sensor.signalDetectionHandlerMethod)).First();
+                MonoBehaviour callbackScript = allCallbacks.First();
+                MethodInfo callbackMethod = callbackScript.GetType().GetMethods().Where(x => x.Name.Equals(signalDetectionHandlerMethod)).First();
+                sensor.delegateSignalDetected = (Sensor.DelegateSignalDetected)(
+                    Sensor.DelegateSignalDetected.CreateDelegate(typeof(Sensor.DelegateSignalDetected), callbackScript, callbackMethod));
+                
             }
         }
 
-        if (sensor.customDistanceMonobehaviorHandler != "" && sensor.customDistanceHandlerMethod != "")
+        if (customDistanceMonobehaviorHandler != "" && customDistanceHandlerMethod != "")
         {
             IEnumerable<MonoBehaviour> allCallbacks = gameObject.GetComponents<MonoBehaviour>().
-                Where(x => x.name == sensor.customDistanceMonobehaviorHandler || x.GetType().Name == sensor.customDistanceMonobehaviorHandler ||
-                x.GetType().BaseType.Name == sensor.customDistanceMonobehaviorHandler);
+                Where(x => x.name == customDistanceMonobehaviorHandler || x.GetType().Name == customDistanceMonobehaviorHandler ||
+                x.GetType().BaseType.Name == customDistanceMonobehaviorHandler);
 
             if (allCallbacks.Count() <= 0)
             {
-                Debug.LogError("Custom Distance Callback " + sensor.customDistanceMonobehaviorHandler + "." +
-                                    sensor.customDistanceHandlerMethod + "() was not resolved!");
+                Debug.LogError("Custom Distance Callback " + customDistanceMonobehaviorHandler + "." +
+                                    customDistanceHandlerMethod + "() was not resolved!");
             }
             else {
-                sensor.callbackCustomDistanceScript = allCallbacks.First();
-
-                sensor.CallbackCustomDistance = sensor.callbackCustomDistanceScript.GetType().GetMethods().Where(x => x.Name.Equals(sensor.customDistanceHandlerMethod)).First();
+                MonoBehaviour callbackCustomDistanceScript = allCallbacks.First();
+                MethodInfo CallbackCustomDistance = callbackCustomDistanceScript.GetType().GetMethods().Where(x => x.Name.Equals(customDistanceHandlerMethod)).First();
+                sensor.delegateDistanceCalculation = (Sensor.DelegateDistanceCalculation)(
+                    Sensor.DelegateDistanceCalculation.CreateDelegate(typeof(Sensor.DelegateDistanceCalculation), callbackCustomDistanceScript, CallbackCustomDistance));
             }
         }
     }

@@ -132,21 +132,45 @@ public abstract class Signal
             result *= transform.GetHashCode();
         return result;
     }
+
+    //Builder methods
+    public Signal SetSense(SenseType sense)
+    {
+        this.Sense = sense;
+        return this;
+    }
+
+    public Signal SetIntensity(float intensity)
+    {
+        this.Intensity = intensity;
+        return this;
+    }
+
+    public Signal SetTransform(Transform transform)
+    {
+        this.transform = transform;
+        return this;
+    }
 }
 
-public class VisionSignal : Signal
+public class VisualSignal : Signal
 {
+    public VisualSignal()
+    {
+        this.Intensity = 1;
+    }
 
-    public VisionSignal(Transform transform)
+    public VisualSignal(Transform transform)
     {
         this.transform = transform;
         this.Intensity = 1; // by default visual signals have full intensity
     }
+
 }
 
 public class AudioSignal : Signal
 {
-    public readonly float Range;
+    public float Range;
 
     public bool AttenuatedByObstacles;
 
@@ -154,6 +178,24 @@ public class AudioSignal : Signal
     {
         this.Range = range;
         this.AttenuatedByObstacles = attenuatedByObstacles;
+    }
+
+    //Builder methods
+    public AudioSignal()
+    {
+        this.AttenuatedByObstacles = false;
+    }
+
+    public AudioSignal SetAttenuatedByObstacles(bool attenuated)
+    {
+        this.AttenuatedByObstacles = attenuated;
+        return this;
+    }
+
+    public AudioSignal SetRange(float range)
+    {
+        this.Range = range;
+        return this;
     }
 }
 

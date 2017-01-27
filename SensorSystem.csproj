@@ -82,6 +82,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\SensorySystem\Scripts\Sensor.cs" />
+    <Compile Include="Assets\SensorySystem\Scripts\SensorBuilder.cs" />
     <Compile Include="Assets\SensorySystem\Scripts\SensorHandler.cs" />
     <Compile Include="Assets\SensorySystem\Scripts\SensorManager.cs" />
     <Compile Include="Assets\SensorySystem\Scripts\SensorManagerObject.cs" />

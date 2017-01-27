@@ -167,5 +167,60 @@ public class Sensor
         maxViewConeDistance = maxDistance;
     }
 
+    // Buidler methods
 
+    public Sensor SetSense(SenseType sense)
+    {
+        this.Sense = sense;
+        return this;
+    }
+
+    public Sensor SetCoolDownSeconds(float CoolDownSeconds)
+    {
+        this.CoolDownSeconds = CoolDownSeconds;
+        return this;
+    }
+
+    public Sensor SetDrawCones(Boolean drawCones)
+    {
+        this.DrawCones = drawCones;
+        return this;
+    }
+
+    public Sensor SetForward(Vector3 forward)
+    {
+        this.Forward = forward;
+        return this;
+    }
+
+    public Sensor SetPosition(Vector3 position)
+    {
+        this.Position = position;
+        return this;
+    }
+
+    public Sensor SetLayerMask(LayerMask layerMask)
+    {
+        this.LayerMask = layerMask;
+        return this;
+    }
+
+    public Sensor SetDelegateSignalDetected(DelegateSignalDetected delegateSignalDetected)
+    {
+        this.delegateSignalDetected = delegateSignalDetected;
+        return this;
+    }
+
+    public Sensor SetDelegateDistanceCalculation(DelegateDistanceCalculation delegateDistanceCalculation)
+    {
+        this.delegateDistanceCalculation = delegateDistanceCalculation;
+        return this;
+    }
+
+    public Sensor AddViewCone(ViewCone viewCone)
+    {
+        if (!ViewCones.Contains(viewCone))
+            ViewCones.Add(viewCone);
+        return this;
+    }
 }

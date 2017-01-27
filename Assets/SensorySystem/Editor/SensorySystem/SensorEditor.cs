@@ -19,6 +19,9 @@ public class SensorEditor : Editor
         if (sensorObj.sensor == null)
             return;
 
+
+        GUILayout.Box("Sensor General Options", EditorStyles.helpBox);
+
         sensorObj.sensor.Sense = (SenseType)EditorGUILayout.EnumPopup("Sense type", sensorObj.sensor.Sense);
         sensorObj.sensor.CoolDownSeconds = EditorGUILayout.FloatField("Full Cooldown in seconds", sensorObj.sensor.CoolDownSeconds);
         AddCallbackGUI(sensorObj);
@@ -73,7 +76,7 @@ public class SensorEditor : Editor
                 for (int i = 0; i < sensorObj.sensor.ViewCones.Count; i++)
                 {
                     EditorGUILayout.Space();
-                    EditorGUILayout.LabelField("View Cone " + (i + 1), EditorStyles.boldLabel);
+                    GUILayout.Box("View Cone " + (i + 1), EditorStyles.helpBox);
 
                     value = EditorGUILayout.IntSlider("FoV (degrees)", sensorObj.sensor.ViewCones[i].FoVAngle, 0, 180);
                     if (value != sensorObj.sensor.ViewCones[i].FoVAngle)

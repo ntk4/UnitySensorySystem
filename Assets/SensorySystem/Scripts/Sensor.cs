@@ -24,9 +24,6 @@ public class Sensor
     
     public Vector3 Position, Forward; // position interface
     private int InstanceID;
-
-    [Tooltip("Layer mask to ignore when raycasting. Usually the layer where the sensor object belongs to")]
-    public LayerMask LayerMask;
     
     // Callbacks
     public delegate void DelegateSignalDetected(SenseLink senseLink);
@@ -72,9 +69,11 @@ public class Sensor
         // 3. If the signal is in a view cone raycast to see if it's visible
         if ((int)maxAwarenessForSignal > (int)Awareness.None)
         {
-            if (Physics.Raycast(Position, directionToSignal, out hit, Mathf.Infinity, LayerMask.value))
+            RaycastHit[] hits = Physics.RaycastAll(Position, directionToSignal);
+            if ((hits.Select(x => x.transform.position == signal.Position).Count() > 0))
+            //if (Physics.Raycast(Position, directionToSignal, out hit))
             {
-                if (hit.transform.position.Equals(signal.Position)) //hit the signal, nothing in between
+                //if (hit.transform.position.Equals(signal.Position)) //hit the signal, nothing in between
                     return new SenseLink(Time.time, signal, maxAwarenessForSignal, true, signal.Sense);
             }
         }
@@ -201,12 +200,6 @@ public class Sensor
     public Sensor SetPosition(Vector3 position)
     {
         this.Position = position;
-        return this;
-    }
-
-    public Sensor SetLayerMask(LayerMask layerMask)
-    {
-        this.LayerMask = layerMask;
         return this;
     }
 

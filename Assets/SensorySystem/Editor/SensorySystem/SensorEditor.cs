@@ -37,18 +37,6 @@ public class SensorEditor : Editor
         if (sensorObj.sensor.CustomDistanceCalculation)
             AddCustomDistanceGUI(sensorObj);
 
-        // Alternatively we can use a MaskField that allows selecting multiple layers in a mask, but the resulting raycast 
-        // seems not to respect the selection.
-        //int value = EditorGUILayout.MaskField("Sense Layer(s)", sensorObj.sensor.LayerMask, UnityEditorInternal.InternalEditorUtility.layers);
-        int value = EditorGUILayout.LayerField("Sensor Layer", sensorObj.sensor.LayerMask, new GUILayoutOption[] { });
-        if (value != sensorObj.sensor.LayerMask)
-        {
-            Undo.RecordObject(sensorObj, "Sensor layer mask");
-            sensorObj.sensor.LayerMask = value;
-            MarkSceneDirty();
-            SceneView.RepaintAll();
-        }
-
         EditorGUILayout.Space();
 
         if (sensorObj.sensor.Sense == SenseType.Vision)
@@ -78,7 +66,7 @@ public class SensorEditor : Editor
                     EditorGUILayout.Space();
                     GUILayout.Box("View Cone " + (i + 1), EditorStyles.helpBox);
 
-                    value = EditorGUILayout.IntSlider("FoV (degrees)", sensorObj.sensor.ViewCones[i].FoVAngle, 0, 180);
+                    int value = EditorGUILayout.IntSlider("FoV (degrees)", sensorObj.sensor.ViewCones[i].FoVAngle, 0, 180);
                     if (value != sensorObj.sensor.ViewCones[i].FoVAngle)
                     {
                         Undo.RecordObject(sensorObj, "Change View Cone");

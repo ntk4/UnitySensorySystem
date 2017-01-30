@@ -120,6 +120,8 @@ public abstract class Signal
 
     public float Intensity;
 
+    private int InstanceID;
+
     public override bool Equals(object obj)
     {
         return obj is Signal && obj.GetHashCode() == GetHashCode();
@@ -131,6 +133,11 @@ public abstract class Signal
         if (transform != null)
             result *= transform.GetHashCode();
         return result;
+    }
+
+    public int GetInstanceID()
+    {
+        return InstanceID;
     }
 
     //Builder methods
@@ -149,6 +156,12 @@ public abstract class Signal
     public Signal SetTransform(Transform transform)
     {
         this.transform = transform;
+        return this;
+    }
+
+    public Signal SetInstanceID(int instanceID)
+    {
+        this.InstanceID = instanceID;
         return this;
     }
 }

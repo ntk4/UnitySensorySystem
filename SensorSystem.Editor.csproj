@@ -124,7 +124,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Assets\SensorySystem\Editor\CrossPlatformInput\CrossPlatformInputInitialize.cs" />
     <Compile Include="Assets\SensorySystem\Editor\SensorySystem\SensorEditor.cs" />
   </ItemGroup>
   <ItemGroup>

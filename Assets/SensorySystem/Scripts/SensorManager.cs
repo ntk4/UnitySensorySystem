@@ -5,20 +5,18 @@ public class SensorManager
 {
     private int FramesSinceLastExecution;
 
-    private Dictionary<int, Sensor> sensors = new Dictionary<int, Sensor>();
+    private List<Sensor> sensors = new List<Sensor>();
     private int nextSensorIndex = 0;
 
-    private Dictionary<int, Signal> signals = new Dictionary<int, Signal>();
+    private List<Signal> signals = new List<Signal>();
     private int nextSignalIndex = 0;
 
 
     /// <summary>
     /// Maintains the SenseLinks per Sensor Index. The key corresponds to the key of sensors dictionary.
     /// </summary>
-    private Dictionary<int, List<SenseLink>> sensorLinks = new Dictionary<int, List<SenseLink>>();
-
-    Signal iterSignal;
-    Sensor iterSensor;
+    private Dictionary<Sensor, List<SenseLink>> sensorLinks = new Dictionary<Sensor, List<SenseLink>>();
+    
     List<SenseLink> iterSenseLinks;
 
     public void Update(int FramesDelay)
@@ -36,14 +34,14 @@ public class SensorManager
     private void coolDownSensors()
     {
         // decrease the awareness to implement cooldown
-        foreach (int sensorKey in sensorLinks.Keys)
+        foreach (Sensor sensor in sensorLinks.Keys)
         {
-            iterSenseLinks = sensorLinks[sensorKey];
+            iterSenseLinks = sensorLinks[sensor];
 
             if (iterSenseLinks != null && iterSenseLinks.Count > 0)
             {
-                iterSensor = sensors[sensorKey];
-                float coolDownTimePerPhase = iterSensor.CalculateCooldownTimePerPhase();
+                //iterSensor = sensors.[sensor];
+                float coolDownTimePerPhase = sensor.CalculateCooldownTimePerPhase();
 
                 foreach (SenseLink iterLink in iterSenseLinks)
                 {
@@ -62,36 +60,35 @@ public class SensorManager
     private void evaluateSignals()
     {
         //for (int signalIndex = 0; signalIndex < signals.Values.Count; signalIndex++)
-        foreach(int signalkey in signals.Keys)
+        foreach(Signal signal in signals)
         {
-            iterSignal = signals[signalkey];
-            foreach (int sensorkey in sensors.Keys)
+            //iterSignal = signals[signalkey];
+            foreach (Sensor sensor in sensors)
             {
-                evaluateIteration(sensorkey);
+                evaluateIteration(sensor, signal);
             }
         }
     }
 
-    private void evaluateIteration(int sensorkey)
+    private void evaluateIteration(Sensor iterSensor, Signal signal)
     {
-        iterSensor = sensors[sensorkey];
         if (iterSensor == null) //in the meantime the gameObject may have died
         {
-            sensors.Remove(sensorkey);
+            sensors.Remove(iterSensor);
             return;
         }
 
         List<SenseLink> memoryLinks = null;
         try
         {
-            memoryLinks = sensorLinks[sensorkey];
+            memoryLinks = sensorLinks[iterSensor];
         }
         catch
         {
             memoryLinks = new List<SenseLink>();
         }
 
-        SenseLink link = iterSensor.Evaluate(iterSignal);
+        SenseLink link = iterSensor.Evaluate(signal);
         if (link != null && iterSensor.delegateSignalDetected != null)
         {
             //1. Find the SenseLink in the memory of the particular sensor
@@ -115,7 +112,7 @@ public class SensorManager
             else if (memoryLinkIndex == -1) // new signal, add new entry
             {
                 memoryLinks.Add(link);
-                sensorLinks[sensorkey] = memoryLinks;
+                sensorLinks[iterSensor] = memoryLinks;
             }
             
             iterSensor.delegateSignalDetected.Invoke(link);
@@ -124,51 +121,55 @@ public class SensorManager
 
     public int RegisterSensor(Sensor sensor)
     {
-        bool exists = sensors.ContainsValue(sensor);
+        bool exists = sensors.Contains(sensor);
         if (!exists)
         {
-            sensors.Add(nextSensorIndex, sensor);
-            sensorLinks.Add(nextSensorIndex, new List<SenseLink>());
+            //TODO: let sensor resolve its own ID with an independent authority, not SensorManager
+            sensor.SetInstanceID(nextSensorIndex); 
+            sensors.Add(sensor);
+            sensorLinks.Add(sensor, new List<SenseLink>());
             return nextSensorIndex++;
         }
         return -1;
     }
 
-    public void UnregisterSensor(int RegistrationNumber)
+    public void UnregisterSensor(Sensor sensor)
     {
-        if (IsValidSensor(RegistrationNumber))
+        if (IsValidSensor(sensor))
         {
-            sensors.Remove(RegistrationNumber);
-            sensorLinks.Remove(RegistrationNumber);
+            sensors.Remove(sensor);
+            sensorLinks.Remove(sensor);
         }
     }
 
-    private bool IsValidSensor(int RegistrationNumber)
+    private bool IsValidSensor(Sensor sensor)
     {
-        return RegistrationNumber >= 0 && sensors.ContainsKey(RegistrationNumber);
+        return sensor != null && sensors.Contains(sensor);
     }
 
     public int RegisterSignal(Signal signal)
     {
-        bool exists = signals.ContainsValue(signal);
+        bool exists = signals.Contains(signal);
         if (!exists)
         {
-            signals.Add(nextSignalIndex, signal);
+            //TODO: let signal resolve its own ID with an independent authority, not SensorManager
+            signal.SetInstanceID(nextSignalIndex);
+            signals.Add(signal);
             return nextSignalIndex++;
         }
         return -1;
     }
 
-    public void UnregisterSignal(int RegistrationNumber)
+    public void UnregisterSignal(Signal signal)
     {
-        if (IsValidSignal(RegistrationNumber))
+        if (IsValidSignal(signal))
         {
-            signals.Remove(RegistrationNumber);
+            signals.Remove(signal);
         }
     }
 
-    private bool IsValidSignal(int RegistrationNumber)
+    private bool IsValidSignal(Signal signal)
     {
-        return RegistrationNumber >= 0 && signals.ContainsKey(RegistrationNumber);
+        return signal != null && signals.Contains(signal);
     }
 }

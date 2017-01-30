@@ -9,8 +9,6 @@ public class SensorObject : MonoBehaviour {
 
     public Sensor sensor;
 
-    private int RegistrationNumber;
-
     public SensorManagerObject sensorManager;
 
     // Callback names (the actually persistent information)
@@ -27,7 +25,7 @@ public class SensorObject : MonoBehaviour {
     void Start()
     {
         sensorManager = GameObject.Find("SensorManager").GetComponent<SensorManagerObject>();
-        RegistrationNumber = sensorManager.RegisterSensor(sensor);
+        sensorManager.RegisterSensor(sensor);
         sensor.recalculateMaxViewConeDistance();
 
         ResolveCallbacks();
@@ -44,7 +42,7 @@ public class SensorObject : MonoBehaviour {
 
     void OnDisable()
     {
-        sensorManager.UnregisterSensor(RegistrationNumber);
+        sensorManager.UnregisterSensor(sensor);
     }
 
     public void ResolveCallbacks()

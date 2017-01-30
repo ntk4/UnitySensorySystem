@@ -1,5 +1,4 @@
 ﻿using UnityEngine;
-using UnityEngine.Events;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
@@ -24,6 +23,7 @@ public class Sensor
     public bool CustomDistanceCalculation = false;
     
     public Vector3 Position, Forward; // position interface
+    private int InstanceID;
 
     [Tooltip("Layer mask to ignore when raycasting. Usually the layer where the sensor object belongs to")]
     public LayerMask LayerMask;
@@ -167,7 +167,12 @@ public class Sensor
         maxViewConeDistance = maxDistance;
     }
 
-    // Buidler methods
+    public int GetInstanceID()
+    {
+        return InstanceID;
+    }
+
+    // Builder methods
 
     public Sensor SetSense(SenseType sense)
     {
@@ -214,6 +219,12 @@ public class Sensor
     public Sensor SetDelegateDistanceCalculation(DelegateDistanceCalculation delegateDistanceCalculation)
     {
         this.delegateDistanceCalculation = delegateDistanceCalculation;
+        return this;
+    }
+
+    public Sensor SetInstanceID(int instanceID)
+    {
+        this.InstanceID = instanceID;
         return this;
     }
 

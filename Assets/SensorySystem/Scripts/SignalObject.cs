@@ -36,7 +36,7 @@ public class SignalObject : MonoBehaviour {
     void resetSignal()
     {
         if (signal != null && signalIndex >= 0)
-            manager.UnregisterSignal(signalIndex);
+            manager.UnregisterSignal(signal);
 
         if (signalType == SenseType.Vision)
             signal = new VisualSignal(transform);
@@ -49,7 +49,7 @@ public class SignalObject : MonoBehaviour {
     void OnDisable()
     {
         if (manager != null)
-            manager.UnregisterSignal(signalIndex);
+            manager.UnregisterSignal(signal);
     }
 
     public Signal GetSignal()

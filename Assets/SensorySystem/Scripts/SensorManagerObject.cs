@@ -24,11 +24,11 @@ public class SensorManagerObject : MonoBehaviour
         return -1;
     }
 
-    public void UnregisterSensor(int RegistrationNumber)
+    public void UnregisterSensor(Sensor sensor)
     {
         if (sensorManager != null)
         {
-            sensorManager.UnregisterSensor(RegistrationNumber);
+            sensorManager.UnregisterSensor(sensor);
         }
     }
 
@@ -39,11 +39,11 @@ public class SensorManagerObject : MonoBehaviour
         return -1;
     }
 
-    public void UnregisterSignal(int RegistrationNumber)
+    public void UnregisterSignal(Signal signal)
     {
         if (sensorManager != null)
         {
-            sensorManager.UnregisterSignal(RegistrationNumber);
+            sensorManager.UnregisterSignal(signal);
         }
     }
 }

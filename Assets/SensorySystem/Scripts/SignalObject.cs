@@ -39,11 +39,17 @@ public class SignalObject : MonoBehaviour {
             manager.UnregisterSignal(signal);
 
         if (signalType == SenseType.Vision)
-            signal = new VisualSignal(transform);
+            signal = new VisualSignal(transform.position);
         else
             signal = new AudioSignal(AudioSignalRange, AudioSignalAttenuatedByObstacles);
 
         signalIndex = manager.RegisterSignal(signal);
+    }
+
+    void Update()
+    {
+        if (signal != null)
+            signal.SetPosition(transform.position);
     }
 
     void OnDisable()

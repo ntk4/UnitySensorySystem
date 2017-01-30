@@ -94,12 +94,12 @@ public class ViewCone
 
     public Awareness EvaluateSignal(Vector3 conePosition, Vector3 coneForward, Signal signal)
     {
-        if ((signal.Transform.position - conePosition).magnitude < range) //within range
+        if ((signal.Position - conePosition).magnitude < range) //within range
         {
             if (horizontalOffset > 0)
                 coneForward = Quaternion.Euler(0, horizontalOffset, 0) * coneForward;
             
-            if (Vector3.Angle(coneForward, signal.Transform.position - conePosition) < fovAngle / 2)
+            if (Vector3.Angle(coneForward, signal.Position - conePosition) < fovAngle / 2)
             {
                 return awarenessLevel;
             }
@@ -110,11 +110,11 @@ public class ViewCone
 
 public abstract class Signal
 {
-    public Transform Transform
+    public Vector3 Position
     {
-        get { return transform; }
+        get { return position; }
     }
-    protected Transform transform;
+    protected Vector3 position;
 
     public SenseType Sense;
 
@@ -130,8 +130,8 @@ public abstract class Signal
     public override int GetHashCode()
     {
         int result = base.GetHashCode();
-        if (transform != null)
-            result *= transform.GetHashCode();
+        if (InstanceID != 0)
+            result *= InstanceID;
         return result;
     }
 
@@ -153,9 +153,9 @@ public abstract class Signal
         return this;
     }
 
-    public Signal SetTransform(Transform transform)
+    public Signal SetPosition(Vector3 position)
     {
-        this.transform = transform;
+        this.position = position;
         return this;
     }
 
@@ -173,10 +173,10 @@ public class VisualSignal : Signal
         this.Intensity = 1;
     }
 
-    public VisualSignal(Transform transform)
+    public VisualSignal(Vector3 position)
     {
-        this.transform = transform;
-        this.Intensity = 1; // by default visual signals have full intensity
+        this.Intensity = 1;
+        this.SetPosition(position);
     }
 
 }
@@ -309,6 +309,6 @@ public class DefaultDistanceCalculator
 {
     public static Vector3 CalculateDistance(Sensor sensor, Signal signal)
     {
-        return signal.Transform.position - sensor.Position;
+        return signal.Position - sensor.Position;
     }
 }

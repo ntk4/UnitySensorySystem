@@ -74,7 +74,7 @@ public class Sensor
         {
             if (Physics.Raycast(Position, directionToSignal, out hit, Mathf.Infinity, LayerMask.value))
             {
-                if (hit.transform.position.Equals(signal.Transform.position)) //hit the signal, nothing in between
+                if (hit.transform.position.Equals(signal.Position)) //hit the signal, nothing in between
                     return new SenseLink(Time.time, signal, maxAwarenessForSignal, true, signal.Sense);
             }
         }

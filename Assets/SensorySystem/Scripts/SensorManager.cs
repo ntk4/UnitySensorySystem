@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 public class SensorManager
 {
+    public int FramesDelay;
+
     private int FramesSinceLastExecution;
 
     private List<Sensor> sensors = new List<Sensor>();
@@ -19,7 +21,12 @@ public class SensorManager
     
     List<SenseLink> iterSenseLinks;
 
-    public void Update(int FramesDelay)
+    public SensorManager()
+    {
+        this.FramesDelay = 30; //default = 30 frames
+    }
+
+    public void Update()
     {
         if (FramesSinceLastExecution++ >= FramesDelay)
         {

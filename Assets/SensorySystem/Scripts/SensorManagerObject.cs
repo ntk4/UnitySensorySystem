@@ -10,12 +10,13 @@ public class SensorManagerObject : MonoBehaviour
     void Awake()
     {
         sensorManager = new SensorManager();
+        sensorManager.FramesDelay = this.FramesDelay;
     }
 
     void Update()
     {
         if (sensorManager != null)
-            sensorManager.Update(FramesDelay);
+            sensorManager.Update();
     }
     public int RegisterSensor(Sensor sensor)
     {

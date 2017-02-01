@@ -27,6 +27,13 @@ public enum SenseType
     Hearing
 }
 
+public enum RaycastType
+{
+    NoRaycast,
+    Single,
+    Complete
+}
+
 // A ViewCone used for sensing using the SenseType.Vision. A Sensor may have one or more ViewCones
 [Serializable]
 public class ViewCone
@@ -312,3 +319,4 @@ public class DefaultDistanceCalculator
         return signal.Position - sensor.Position;
     }
 }
+

@@ -24,6 +24,8 @@ public class Sensor
     
     public Vector3 Position, Forward; // position interface
     private int InstanceID;
+
+    public RaycastType raycastType;
     
     // Callbacks
     public delegate void DelegateSignalDetected(SenseLink senseLink);
@@ -69,13 +71,27 @@ public class Sensor
         // 3. If the signal is in a view cone raycast to see if it's visible
         if ((int)maxAwarenessForSignal > (int)Awareness.None)
         {
-            RaycastHit[] hits = Physics.RaycastAll(Position, directionToSignal);
-            if ((hits.Select(x => x.transform.position == signal.Position).Count() > 0))
-            //if (Physics.Raycast(Position, directionToSignal, out hit))
+            Boolean sensed = false;
+            switch (raycastType)
             {
-                //if (hit.transform.position.Equals(signal.Position)) //hit the signal, nothing in between
-                    return new SenseLink(Time.time, signal, maxAwarenessForSignal, true, signal.Sense);
+                case RaycastType.NoRaycast:
+                    sensed = true;
+                    break;
+                    
+                case RaycastType.Single:
+                    
+                    if (Physics.Raycast(Position, directionToSignal, out hit))
+                        sensed = hit.transform.position.Equals(signal.Position); //hit the signal, nothing in between
+                    break;
+
+                case RaycastType.Complete:
+                    RaycastHit[] hits = Physics.RaycastAll(Position, directionToSignal);
+                    sensed = (hits != null && hits.Count() > 0 && hits.Select(x => x.transform.position == signal.Position).Count() > 0);
+                    break;
             }
+
+            if (sensed)
+                return new SenseLink(Time.time, signal, maxAwarenessForSignal, true, signal.Sense);
         }
 
         return null;        

@@ -41,6 +41,16 @@ public class SensorEditor : Editor
 
         if (sensorObj.sensor.Sense == SenseType.Vision)
         {
+
+            RaycastType raycastType = (RaycastType)EditorGUILayout.EnumPopup("Raycast type", sensorObj.sensor.raycastType);
+            if (raycastType != sensorObj.sensor.raycastType)
+            {
+                Undo.RecordObject(sensorObj, "Raycast Type");
+                sensorObj.sensor.raycastType = raycastType;
+                MarkSceneDirty();
+                SceneView.RepaintAll();
+            }
+
             val = EditorGUILayout.Toggle("Preview View Cones", sensorObj.sensor.DrawCones);
             if (val != sensorObj.sensor.DrawCones)
             {

@@ -4,3 +4,6 @@ Build
 *.meta
 *.suo
 Standard Assets
+*.csproj
+*.sln
+*.userprefs

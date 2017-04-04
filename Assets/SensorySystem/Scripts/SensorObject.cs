@@ -53,7 +53,7 @@ public class SensorObject : MonoBehaviour {
                 Where(x => x.name == signalDetectionMonobehaviorHandler || x.GetType().Name == signalDetectionMonobehaviorHandler ||
                 x.GetType().BaseType.Name == signalDetectionMonobehaviorHandler);
 
-            if (allCallbacks.Count() <= 0)
+            if (allCallbacks == null || allCallbacks.Count() <= 0)
             {
                 Debug.LogError("Sensor Callback " + signalDetectionMonobehaviorHandler + "." +
                                     signalDetectionHandlerMethod + "() was not resolved!");

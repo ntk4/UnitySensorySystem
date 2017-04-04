@@ -255,6 +255,9 @@ public class SensorEditor : Editor
         MethodInfo[] temp;
         foreach (MonoBehaviour script in sensorObj.gameObject.GetComponents<MonoBehaviour>())
         {
+            if (script == null)
+                continue; //which should never happen
+
             temp = script.GetType()
             .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public) // Instance methods, both public and private/protected
             //.Where(x => x.DeclaringType == script.GetType()) // Do not only list methods defined in our own class, they may be in a super class

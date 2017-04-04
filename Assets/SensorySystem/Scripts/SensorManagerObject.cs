@@ -1,50 +1,53 @@
 ﻿using UnityEngine;
 using System.Collections.Generic;
 
-public class SensorManagerObject : MonoBehaviour
+namespace UnitySensorySystem
 {
-    public SensorManager sensorManager;
-
-    public int FramesDelay;
-
-    void Awake()
+    public class SensorManagerObject : MonoBehaviour
     {
-        sensorManager = new SensorManager();
-        sensorManager.FramesDelay = this.FramesDelay;
-    }
+        public SensorManager sensorManager;
 
-    void Update()
-    {
-        if (sensorManager != null)
-            sensorManager.Update();
-    }
-    public int RegisterSensor(Sensor sensor)
-    {
-        if (sensorManager != null)
-            return sensorManager.RegisterSensor(sensor);
-        return -1;
-    }
+        public int FramesDelay;
 
-    public void UnregisterSensor(Sensor sensor)
-    {
-        if (sensorManager != null)
+        void Awake()
         {
-            sensorManager.UnregisterSensor(sensor);
+            sensorManager = new SensorManager();
+            sensorManager.FramesDelay = this.FramesDelay;
         }
-    }
 
-    public int RegisterSignal(Signal signal)
-    {
-        if (sensorManager != null)
-            return sensorManager.RegisterSignal(signal);
-        return -1;
-    }
-
-    public void UnregisterSignal(Signal signal)
-    {
-        if (sensorManager != null)
+        void Update()
         {
-            sensorManager.UnregisterSignal(signal);
+            if (sensorManager != null)
+                sensorManager.Update();
+        }
+        public int RegisterSensor(Sensor sensor)
+        {
+            if (sensorManager != null)
+                return sensorManager.RegisterSensor(sensor);
+            return -1;
+        }
+
+        public void UnregisterSensor(Sensor sensor)
+        {
+            if (sensorManager != null)
+            {
+                sensorManager.UnregisterSensor(sensor);
+            }
+        }
+
+        public int RegisterSignal(Signal signal)
+        {
+            if (sensorManager != null)
+                return sensorManager.RegisterSignal(signal);
+            return -1;
+        }
+
+        public void UnregisterSignal(Signal signal)
+        {
+            if (sensorManager != null)
+            {
+                sensorManager.UnregisterSignal(signal);
+            }
         }
     }
 }

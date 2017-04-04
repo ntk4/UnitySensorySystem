@@ -5,85 +5,92 @@ using System.Reflection;
 using System.Linq;
 using System;
 
-public class SensorObject : MonoBehaviour {
-
-    public Sensor sensor;
-
-    public SensorManagerObject sensorManager;
-
-    // Callback names (the actually persistent information)
-    [SerializeField]
-    public string signalDetectionHandlerMethod;
-    [SerializeField]
-    public string signalDetectionMonobehaviorHandler;
-    // Custom Distance Callback names (the actually persistent information)
-    //[SerializeField]
-    public string customDistanceHandlerMethod;
-    //[SerializeField]
-    public string customDistanceMonobehaviorHandler;
-
-    void Start()
+namespace UnitySensorySystem
+{
+    public class SensorObject : MonoBehaviour
     {
-        sensorManager = GameObject.Find("SensorManager").GetComponent<SensorManagerObject>();
-        sensorManager.RegisterSensor(sensor);
-        sensor.recalculateMaxViewConeDistance();
 
-        ResolveCallbacks();
-    }
+        public Sensor sensor;
 
-    void Update()
-    {
-        if (sensor != null)
+        public SensorManagerObject sensorManager;
+
+        // Callback names (the actually persistent information)
+        [SerializeField]
+        public string signalDetectionHandlerMethod;
+        [SerializeField]
+        public string signalDetectionMonobehaviorHandler;
+        // Custom Distance Callback names (the actually persistent information)
+        //[SerializeField]
+        public string customDistanceHandlerMethod;
+        //[SerializeField]
+        public string customDistanceMonobehaviorHandler;
+
+        void Start()
         {
-            sensor.Position = transform.position;
-            sensor.Forward = transform.forward;
+            sensorManager = GameObject.Find("SensorManager").GetComponent<SensorManagerObject>();
+            sensorManager.RegisterSensor(sensor);
+            sensor.recalculateMaxViewConeDistance();
+
+            ResolveCallbacks();
         }
-    }
 
-    void OnDisable()
-    {
-        sensorManager.UnregisterSensor(sensor);
-    }
-
-    public void ResolveCallbacks()
-    {
-        if (signalDetectionMonobehaviorHandler != "" && signalDetectionHandlerMethod != "")
+        void Update()
         {
-            IEnumerable<MonoBehaviour> allCallbacks = gameObject.GetComponents<MonoBehaviour>().
-                Where(x => x.name == signalDetectionMonobehaviorHandler || x.GetType().Name == signalDetectionMonobehaviorHandler ||
-                x.GetType().BaseType.Name == signalDetectionMonobehaviorHandler);
-
-            if (allCallbacks == null || allCallbacks.Count() <= 0)
+            if (sensor != null)
             {
-                Debug.LogError("Sensor Callback " + signalDetectionMonobehaviorHandler + "." +
-                                    signalDetectionHandlerMethod + "() was not resolved!");
-            }
-            else {
-                MonoBehaviour callbackScript = allCallbacks.First();
-                MethodInfo callbackMethod = callbackScript.GetType().GetMethods().Where(x => x.Name.Equals(signalDetectionHandlerMethod)).First();
-                sensor.delegateSignalDetected = (Sensor.DelegateSignalDetected)(
-                    Sensor.DelegateSignalDetected.CreateDelegate(typeof(Sensor.DelegateSignalDetected), callbackScript, callbackMethod));
-                
+                sensor.Position = transform.position;
+                sensor.Forward = transform.forward;
             }
         }
 
-        if (customDistanceMonobehaviorHandler != "" && customDistanceHandlerMethod != "")
+        void OnDisable()
         {
-            IEnumerable<MonoBehaviour> allCallbacks = gameObject.GetComponents<MonoBehaviour>().
-                Where(x => x.name == customDistanceMonobehaviorHandler || x.GetType().Name == customDistanceMonobehaviorHandler ||
-                x.GetType().BaseType.Name == customDistanceMonobehaviorHandler);
+            sensorManager.UnregisterSensor(sensor);
+        }
 
-            if (allCallbacks.Count() <= 0)
+        public void ResolveCallbacks()
+        {
+            if (signalDetectionMonobehaviorHandler != "" && signalDetectionHandlerMethod != "")
             {
-                Debug.LogError("Custom Distance Callback " + customDistanceMonobehaviorHandler + "." +
-                                    customDistanceHandlerMethod + "() was not resolved!");
+                IEnumerable<MonoBehaviour> allCallbacks = gameObject.GetComponents<MonoBehaviour>().
+                    Where(x => x.name == signalDetectionMonobehaviorHandler || x.GetType().Name == signalDetectionMonobehaviorHandler ||
+                    x.GetType().BaseType.Name == signalDetectionMonobehaviorHandler);
+
+                if (allCallbacks == null || allCallbacks.Count() <= 0)
+                {
+                    Debug.LogError("Sensor Callback " + signalDetectionMonobehaviorHandler + "." +
+                                        signalDetectionHandlerMethod + "() was not resolved!");
+                }
+                else
+                {
+                    MonoBehaviour callbackScript = allCallbacks.First();
+                    MethodInfo callbackMethod = callbackScript.GetType().GetMethods().Where(x => x.Name.Equals(signalDetectionHandlerMethod)).First();
+                    sensor.delegateSignalDetected = (Sensor.DelegateSignalDetected)(
+                        Sensor.DelegateSignalDetected.CreateDelegate(typeof(Sensor.DelegateSignalDetected), callbackScript, callbackMethod));
+
+                }
             }
-            else {
-                MonoBehaviour callbackCustomDistanceScript = allCallbacks.First();
-                MethodInfo CallbackCustomDistance = callbackCustomDistanceScript.GetType().GetMethods().Where(x => x.Name.Equals(customDistanceHandlerMethod)).First();
-                sensor.delegateDistanceCalculation = (Sensor.DelegateDistanceCalculation)(
-                    Sensor.DelegateDistanceCalculation.CreateDelegate(typeof(Sensor.DelegateDistanceCalculation), callbackCustomDistanceScript, CallbackCustomDistance));
+
+            if (customDistanceMonobehaviorHandler != "" && customDistanceHandlerMethod != "")
+            {
+                IEnumerable<MonoBehaviour> allCallbacks = gameObject.GetComponents<MonoBehaviour>().
+                    Where(x => x.name == customDistanceMonobehaviorHandler || x.GetType().Name == customDistanceMonobehaviorHandler ||
+                    x.GetType().BaseType.Name == customDistanceMonobehaviorHandler);
+
+                if (allCallbacks.Count() <= 0)
+                {
+                    Debug.LogError("Custom Distance Callback " + customDistanceMonobehaviorHandler + "." +
+                                        customDistanceHandlerMethod + "() was not resolved!");
+                }
+                else
+                {
+                    MonoBehaviour callbackCustomDistanceScript = allCallbacks.First();
+                    MethodInfo CallbackCustomDistance = callbackCustomDistanceScript.GetType().GetMethods().Where(x => x.Name.Equals(customDistanceHandlerMethod)).First();
+                    sensor.delegateDistanceCalculation = (Sensor.DelegateDistanceCalculation)(
+                        Sensor.DelegateDistanceCalculation.CreateDelegate(typeof(Sensor.DelegateDistanceCalculation), callbackCustomDistanceScript, CallbackCustomDistance));
+                }
             }
         }
     }
+
 }

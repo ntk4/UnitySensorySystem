@@ -3,244 +3,258 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Linq;
-
-[Serializable]
-public class Sensor 
+namespace UnitySensorySystem
 {
-    public SenseType Sense;
-    
-    //[SerializeField]
-    public List<ViewCone> ViewCones = new List<ViewCone>();
-
-    //[SerializeField]
-    public bool DrawCones = true;
-
-    public Alertness CurrentAlertnessLevel;
-
-    //[SerializeField]
-    public float CoolDownSeconds;
-
-    public bool CustomDistanceCalculation = false;
-    
-    public Vector3 Position, Forward; // position interface
-    private int InstanceID;
-
-    public RaycastType raycastType;
-    
-    // Callbacks
-    public delegate void DelegateSignalDetected(SenseLink senseLink);
-    public DelegateSignalDetected delegateSignalDetected;
-    public delegate Vector3 DelegateDistanceCalculation(Sensor sensor, Signal signal);
-    public DelegateDistanceCalculation delegateDistanceCalculation;
-
-
-    private float maxViewConeDistance;
-
-    private RaycastHit hit;
-    private Ray ray;
-
-    public SenseLink Evaluate(Signal signal)
+    [Serializable]
+    public class Sensor
     {
-        if (signal.Sense == SenseType.Vision)
-        {
-            return EvaluateVision(signal);
-        }
-        else
-        {
-            return EvaluateHearing(signal);
-        }
-    }
+        public SenseType Sense;
 
-    private SenseLink EvaluateVision(Signal signal)
-    {
-        // 1. if it's further than the largest view cone range + 1, don't even bother to process
-        Vector3 directionToSignal = calculateDistanceFromSignal(signal);
-        if (directionToSignal.magnitude > maxViewConeDistance + 1)
-            return null; // too far to evaluate
+        //[SerializeField]
+        public List<ViewCone> ViewCones = new List<ViewCone>();
 
-        // 2. If it's in range find the maximum awareness for the cones that the signal intersects
-        Awareness maxAwarenessForSignal = Awareness.None;
-        Awareness temp;
-        foreach (ViewCone vc in ViewCones)
-        {
-            temp = vc.EvaluateSignal(Position, Forward, signal);
-            if ((int)temp > (int)maxAwarenessForSignal)
-                maxAwarenessForSignal = temp;
-        }
+        //[SerializeField]
+        public bool DrawCones = true;
 
-        // 3. If the signal is in a view cone raycast to see if it's visible
-        if ((int)maxAwarenessForSignal > (int)Awareness.None)
+        public Alertness CurrentAlertnessLevel;
+
+        //[SerializeField]
+        public float CoolDownSeconds;
+
+        public bool CustomDistanceCalculation = false;
+
+        public Vector3 Position, Forward; // position interface
+        private int InstanceID;
+
+        public LineOfSightCheck raycastType;
+        private PhysicsHelper physicsHelper; // should be injected be the SensorManager
+
+        // Callbacks
+        public delegate void DelegateSignalDetected(SenseLink senseLink);
+        public DelegateSignalDetected delegateSignalDetected;
+        public delegate Vector3 DelegateDistanceCalculation(Sensor sensor, Signal signal);
+        public DelegateDistanceCalculation delegateDistanceCalculation;
+        public delegate bool DelegateLineOfSight(Sensor sensor, Signal signal);
+        public DelegateLineOfSight delegateLineOfSight;
+
+        private float maxViewConeDistance;
+
+        public SenseLink Evaluate(Signal signal)
         {
-            Boolean sensed = false;
-            switch (raycastType)
+            if (signal.Sense == SenseType.Vision)
             {
-                case RaycastType.NoRaycast:
-                    sensed = true;
-                    break;
-                    
-                case RaycastType.Single:
-                    
-                    if (Physics.Raycast(Position, directionToSignal, out hit))
-                        sensed = hit.transform.position.Equals(signal.Position); //hit the signal, nothing in between
-                    break;
+                return EvaluateVision(signal);
+            }
+            else
+            {
+                return EvaluateHearing(signal);
+            }
+        }
 
-                case RaycastType.Complete:
-                    RaycastHit[] hits = Physics.RaycastAll(Position, directionToSignal);
-                    sensed = (hits != null && hits.Count() > 0 && hits.Select(x => x.transform.position == signal.Position).Count() > 0);
-                    break;
+        private SenseLink EvaluateVision(Signal signal)
+        {
+            // 1. if it's further than the largest view cone range + 1, don't even bother to process
+            Vector3 directionToSignal = calculateDistanceFromSignal(signal);
+            if (directionToSignal.magnitude > maxViewConeDistance + 1)
+                return null; // too far to evaluate
+
+            // 2. If it's in range find the maximum awareness for the cones that the signal intersects
+            Awareness maxAwarenessForSignal = Awareness.None;
+            Awareness temp;
+            foreach (ViewCone vc in ViewCones)
+            {
+                temp = vc.EvaluateSignal(Position, Forward, signal);
+                if ((int)temp > (int)maxAwarenessForSignal)
+                    maxAwarenessForSignal = temp;
             }
 
-            if (sensed)
-                return new SenseLink(Time.time, signal, maxAwarenessForSignal, true, signal.Sense);
-        }
-
-        return null;        
-    }
-
-    private Vector3 calculateDistanceFromSignal(Signal signal)
-    {
-        if (CustomDistanceCalculation)
-        {
-            if (delegateDistanceCalculation != null)
+            // 3. If the signal is in a view cone raycast to see if it's visible
+            if ((int)maxAwarenessForSignal > (int)Awareness.None)
             {
-                object result = delegateDistanceCalculation.Invoke(this, signal);
-                if (result != null && result.GetType() == typeof(Vector3))
+                Boolean sensed = false;
+                switch (raycastType)
                 {
-                    return (Vector3)result;
+                    case LineOfSightCheck.NoCheck:
+                        sensed = true;
+                        break;
+
+                    case LineOfSightCheck.SingleRaycast:
+                        sensed =  physicsHelper.SingleRaycast(Position, directionToSignal, signal);
+                        break;
+
+                    case LineOfSightCheck.CompleteRaycast:
+                        sensed = physicsHelper.CompleteRaycast(Position, directionToSignal, signal);
+                        break;
+
+                    case LineOfSightCheck.Custom:
+                        if (delegateLineOfSight != null)
+                            sensed = delegateLineOfSight.Invoke(this, signal);
+                        break;
                 }
 
-                Debug.LogWarning("Custom distance callback was not resolved or not called properly. Switching to default");
+                if (sensed)
+                    return new SenseLink(Time.time, signal, maxAwarenessForSignal, true, signal.Sense);
             }
+
+            return null;
         }
-        return DefaultDistanceCalculator.CalculateDistance(this, signal);
-    }
 
-    private SenseLink EvaluateHearing(Signal signal)
-    {
-        //TODO
-        return new SenseLink(Time.time, signal, Awareness.Low, true, signal.Sense);
-    }
-
-    public void AddViewCone()
-    {
-        changeViewConeCount(ViewCones.Count + 1);
-    }
-
-    public void RemoveViewCone(int index)
-    {
-        if (index >= 0 && index < ViewCones.Count)
+        private Vector3 calculateDistanceFromSignal(Signal signal)
         {
-            ViewCone coneToRemove = ViewCones[index];
-            ViewCones.RemoveAt(index);
-
-            if (coneToRemove.Range == maxViewConeDistance)
-                recalculateMaxViewConeDistance();
-        }
-    }
-
-    public float CalculateCooldownTimePerPhase()
-    {
-        // divide by 3 because we have 3 stages from Awareness.High through Medium, Low to None
-        return CoolDownSeconds * 0.33f; 
-    }
-
-    private void changeViewConeCount(int newValue)
-    {
-        int oldVal = ViewCones.Count;
-        if (newValue > oldVal)
-        {
-            ViewCone coneToCopy = null;
-            if (oldVal != 0 && ViewCones.Count == oldVal)
-                coneToCopy = ViewCones[ViewCones.Count - 1];
-
-            for (int i = oldVal; i < newValue; i++)
+            if (CustomDistanceCalculation)
             {
-                if (coneToCopy != null)
-                    ViewCones.Add(new ViewCone(coneToCopy));
-                else ViewCones.Add(new ViewCone());
+                if (delegateDistanceCalculation != null)
+                {
+                    object result = delegateDistanceCalculation.Invoke(this, signal);
+                    if (result != null && result.GetType() == typeof(Vector3))
+                    {
+                        return (Vector3)result;
+                    }
+
+                    Debug.LogWarning("Custom distance callback was not resolved or not called properly. Switching to default");
+                }
+            }
+            return DefaultDistanceCalculator.CalculateDistance(this, signal);
+        }
+
+        private SenseLink EvaluateHearing(Signal signal)
+        {
+            //TODO
+            return new SenseLink(Time.time, signal, Awareness.Low, true, signal.Sense);
+        }
+
+        public void AddViewCone()
+        {
+            changeViewConeCount(ViewCones.Count + 1);
+        }
+
+        public void RemoveViewCone(int index)
+        {
+            if (index >= 0 && index < ViewCones.Count)
+            {
+                ViewCone coneToRemove = ViewCones[index];
+                ViewCones.RemoveAt(index);
+
+                if (coneToRemove.Range == maxViewConeDistance)
+                    recalculateMaxViewConeDistance();
             }
         }
-        else if (newValue < oldVal)
-        {
-            if (newValue == 0)
-                ViewCones.Clear();
-            else
-                for (int i = 0; i < oldVal - newValue; i++)
-                    RemoveViewCone(ViewCones.Count - 1);
-        }
-    }
 
-    public void recalculateMaxViewConeDistance()
-    {
-        float maxDistance = 0;
-        foreach(ViewCone vc in ViewCones)
+        internal void SetPhysicsHelper(PhysicsHelper physicsHelper)
         {
-            if (vc.Range > maxDistance)
-                maxDistance = vc.Range;
+            this.physicsHelper = physicsHelper;
         }
 
-        maxViewConeDistance = maxDistance;
-    }
+        internal float CalculateCooldownTimePerPhase()
+        {
+            // divide by 3 because we have 3 stages from Awareness.High through Medium, Low to None
+            return CoolDownSeconds * 0.33f;
+        }
 
-    public int GetInstanceID()
-    {
-        return InstanceID;
-    }
+        private void changeViewConeCount(int newValue)
+        {
+            int oldVal = ViewCones.Count;
+            if (newValue > oldVal)
+            {
+                ViewCone coneToCopy = null;
+                if (oldVal != 0 && ViewCones.Count == oldVal)
+                    coneToCopy = ViewCones[ViewCones.Count - 1];
 
-    // Builder methods
+                for (int i = oldVal; i < newValue; i++)
+                {
+                    if (coneToCopy != null)
+                        ViewCones.Add(new ViewCone(coneToCopy));
+                    else ViewCones.Add(new ViewCone());
+                }
+            }
+            else if (newValue < oldVal)
+            {
+                if (newValue == 0)
+                    ViewCones.Clear();
+                else
+                    for (int i = 0; i < oldVal - newValue; i++)
+                        RemoveViewCone(ViewCones.Count - 1);
+            }
+        }
 
-    public Sensor SetSense(SenseType sense)
-    {
-        this.Sense = sense;
-        return this;
-    }
+        public void recalculateMaxViewConeDistance()
+        {
+            float maxDistance = 0;
+            foreach (ViewCone vc in ViewCones)
+            {
+                if (vc.Range > maxDistance)
+                    maxDistance = vc.Range;
+            }
 
-    public Sensor SetCoolDownSeconds(float CoolDownSeconds)
-    {
-        this.CoolDownSeconds = CoolDownSeconds;
-        return this;
-    }
+            maxViewConeDistance = maxDistance;
+        }
 
-    public Sensor SetDrawCones(Boolean drawCones)
-    {
-        this.DrawCones = drawCones;
-        return this;
-    }
+        public int GetInstanceID()
+        {
+            return InstanceID;
+        }
 
-    public Sensor SetForward(Vector3 forward)
-    {
-        this.Forward = forward;
-        return this;
-    }
+        // Builder methods
 
-    public Sensor SetPosition(Vector3 position)
-    {
-        this.Position = position;
-        return this;
-    }
+        public Sensor SetSense(SenseType sense)
+        {
+            this.Sense = sense;
+            return this;
+        }
 
-    public Sensor SetDelegateSignalDetected(DelegateSignalDetected delegateSignalDetected)
-    {
-        this.delegateSignalDetected = delegateSignalDetected;
-        return this;
-    }
+        public Sensor SetCoolDownSeconds(float CoolDownSeconds)
+        {
+            this.CoolDownSeconds = CoolDownSeconds;
+            return this;
+        }
 
-    public Sensor SetDelegateDistanceCalculation(DelegateDistanceCalculation delegateDistanceCalculation)
-    {
-        this.delegateDistanceCalculation = delegateDistanceCalculation;
-        return this;
-    }
+        public Sensor SetDrawCones(Boolean drawCones)
+        {
+            this.DrawCones = drawCones;
+            return this;
+        }
 
-    public Sensor SetInstanceID(int instanceID)
-    {
-        this.InstanceID = instanceID;
-        return this;
-    }
+        public Sensor SetForward(Vector3 forward)
+        {
+            this.Forward = forward;
+            return this;
+        }
 
-    public Sensor AddViewCone(ViewCone viewCone)
-    {
-        if (!ViewCones.Contains(viewCone))
-            ViewCones.Add(viewCone);
-        return this;
+        public Sensor SetPosition(Vector3 position)
+        {
+            this.Position = position;
+            return this;
+        }
+
+        public Sensor SetDelegateSignalDetected(DelegateSignalDetected delegateSignalDetected)
+        {
+            this.delegateSignalDetected = delegateSignalDetected;
+            return this;
+        }
+
+        public Sensor SetDelegateDistanceCalculation(DelegateDistanceCalculation delegateDistanceCalculation)
+        {
+            this.delegateDistanceCalculation = delegateDistanceCalculation;
+            return this;
+        }
+
+        public Sensor SetDelegateLineOfSight(DelegateLineOfSight delegateLineOfSight)
+        {
+            this.delegateLineOfSight = delegateLineOfSight;
+            return this;
+        }
+
+        public Sensor SetInstanceID(int instanceID)
+        {
+            this.InstanceID = instanceID;
+            return this;
+        }
+
+        public Sensor AddViewCone(ViewCone viewCone)
+        {
+            if (!ViewCones.Contains(viewCone))
+                ViewCones.Add(viewCone);
+            return this;
+        }
     }
 }

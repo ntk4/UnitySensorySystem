@@ -20,10 +20,11 @@ namespace UnitySensorySystem
         [SerializeField]
         public string signalDetectionMonobehaviorHandler;
         // Custom Distance Callback names (the actually persistent information)
-        //[SerializeField]
         public string customDistanceHandlerMethod;
-        //[SerializeField]
         public string customDistanceMonobehaviorHandler;
+        // Custom Line Of Sight Callback names (the actually persistent information)
+        public string customLineOfSightHandlerMethod;
+        public string customLineOfSightMonobehaviorHandler;
 
         void Start()
         {
@@ -88,6 +89,26 @@ namespace UnitySensorySystem
                     MethodInfo CallbackCustomDistance = callbackCustomDistanceScript.GetType().GetMethods().Where(x => x.Name.Equals(customDistanceHandlerMethod)).First();
                     sensor.delegateDistanceCalculation = (Sensor.DelegateDistanceCalculation)(
                         Sensor.DelegateDistanceCalculation.CreateDelegate(typeof(Sensor.DelegateDistanceCalculation), callbackCustomDistanceScript, CallbackCustomDistance));
+                }
+            }
+
+            if (customLineOfSightMonobehaviorHandler != "" && customLineOfSightHandlerMethod != "")
+            {
+                IEnumerable<MonoBehaviour> allCallbacks = gameObject.GetComponents<MonoBehaviour>().
+                    Where(x => x.name == customLineOfSightMonobehaviorHandler || x.GetType().Name == customLineOfSightMonobehaviorHandler ||
+                    x.GetType().BaseType.Name == customLineOfSightMonobehaviorHandler);
+
+                if (allCallbacks.Count() <= 0)
+                {
+                    Debug.LogError("Line Of Sight Callback " + customLineOfSightMonobehaviorHandler + "." +
+                                        customLineOfSightHandlerMethod + "() was not resolved!");
+                }
+                else
+                {
+                    MonoBehaviour callbackLineOfSightScript = allCallbacks.First();
+                    MethodInfo CallbackLineOfSight = callbackLineOfSightScript.GetType().GetMethods().Where(x => x.Name.Equals(customDistanceHandlerMethod)).First();
+                    sensor.delegateLineOfSight = (Sensor.DelegateLineOfSight)(
+                        Sensor.DelegateLineOfSight.CreateDelegate(typeof(Sensor.DelegateLineOfSight), callbackLineOfSightScript, CallbackLineOfSight));
                 }
             }
         }

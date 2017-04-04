@@ -26,15 +26,19 @@ namespace UnitySensorySystem
         public Vector3 Position, Forward; // position interface
         private int InstanceID;
 
-        public LineOfSightCheck raycastType;
-        private PhysicsHelper physicsHelper; // should be injected be the SensorManager
+        public LineOfSightCheck lineOfSightCheck;
 
         // Callbacks
         public delegate void DelegateSignalDetected(SenseLink senseLink);
+        [SerializeField]
         public DelegateSignalDetected delegateSignalDetected;
+
         public delegate Vector3 DelegateDistanceCalculation(Sensor sensor, Signal signal);
+        [SerializeField]
         public DelegateDistanceCalculation delegateDistanceCalculation;
-        public delegate bool DelegateLineOfSight(Sensor sensor, Signal signal);
+
+        public delegate bool DelegateLineOfSight(Sensor sensor, Signal signal, Vector3 directionToSignal);
+        [SerializeField]
         public DelegateLineOfSight delegateLineOfSight;
 
         private float maxViewConeDistance;
@@ -71,26 +75,7 @@ namespace UnitySensorySystem
             // 3. If the signal is in a view cone raycast to see if it's visible
             if ((int)maxAwarenessForSignal > (int)Awareness.None)
             {
-                Boolean sensed = false;
-                switch (raycastType)
-                {
-                    case LineOfSightCheck.NoCheck:
-                        sensed = true;
-                        break;
-
-                    case LineOfSightCheck.SingleRaycast:
-                        sensed =  physicsHelper.SingleRaycast(Position, directionToSignal, signal);
-                        break;
-
-                    case LineOfSightCheck.CompleteRaycast:
-                        sensed = physicsHelper.CompleteRaycast(Position, directionToSignal, signal);
-                        break;
-
-                    case LineOfSightCheck.Custom:
-                        if (delegateLineOfSight != null)
-                            sensed = delegateLineOfSight.Invoke(this, signal);
-                        break;
-                }
+                Boolean sensed = invokeSelectedLineOfSightAlgorithm(signal, directionToSignal);
 
                 if (sensed)
                     return new SenseLink(Time.time, signal, maxAwarenessForSignal, true, signal.Sense);
@@ -117,6 +102,22 @@ namespace UnitySensorySystem
             return DefaultDistanceCalculator.CalculateDistance(this, signal);
         }
 
+        private bool invokeSelectedLineOfSightAlgorithm(Signal signal, Vector3 directionToSignal)
+        {
+            if (delegateLineOfSight != null)
+            {
+                object result = delegateLineOfSight.Invoke(this, signal, directionToSignal);
+                if (result != null && result.GetType() == typeof(bool))
+                {
+                    return (bool)result;
+                }
+
+                Debug.LogWarning("Line Of Sight callback was not resolved or not called properly. Switching to default");
+            }
+
+            return false;
+        }
+
         private SenseLink EvaluateHearing(Signal signal)
         {
             //TODO
@@ -138,11 +139,6 @@ namespace UnitySensorySystem
                 if (coneToRemove.Range == maxViewConeDistance)
                     recalculateMaxViewConeDistance();
             }
-        }
-
-        internal void SetPhysicsHelper(PhysicsHelper physicsHelper)
-        {
-            this.physicsHelper = physicsHelper;
         }
 
         internal float CalculateCooldownTimePerPhase()

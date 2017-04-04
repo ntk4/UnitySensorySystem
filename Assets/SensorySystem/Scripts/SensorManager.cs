@@ -8,9 +8,6 @@ namespace UnitySensorySystem
 
         private int FramesSinceLastExecution;
 
-        // keep here the single physics interface to be used by all sensors 
-        private PhysicsHelper physicsHelper; 
-
         private List<Sensor> sensors = new List<Sensor>();
         private int nextSensorIndex = 0;
 
@@ -28,7 +25,6 @@ namespace UnitySensorySystem
         public SensorManager()
         {
             this.FramesDelay = 30; //default = 30 frames
-            physicsHelper = new PhysicsHelper();
         }
 
         public void Update()
@@ -138,7 +134,6 @@ namespace UnitySensorySystem
             {
                 //TODO: let sensor resolve its own ID with an independent authority, not SensorManager
                 sensor.SetInstanceID(nextSensorIndex);
-                sensor.SetPhysicsHelper(physicsHelper);
                 sensors.Add(sensor);
                 sensorLinks.Add(sensor, new List<SenseLink>());
                 return nextSensorIndex++;

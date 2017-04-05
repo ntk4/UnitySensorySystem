@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace UnitySensorySystem
 {
-    public class SensorPhysicsHelper : MonoBehaviour
+    public class SensoryDefaultAlgorithms : MonoBehaviour
     {
 
         private RaycastHit hit; //TODO: avoid statics!

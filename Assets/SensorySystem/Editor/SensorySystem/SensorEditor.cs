@@ -155,41 +155,42 @@ namespace UnitySensorySystem
             if (sensorObj.sensor != null)
             {
                 int index = 0;
+                sensorObj.ResolveCallbacks(); //otherwise the next method info won't be resolved
                 MethodInfo methodInfo = sensorObj.sensor.delegateSignalDetected != null ? sensorObj.sensor.delegateSignalDetected.Method : null;
 
-                if (methodInfo != null)
+                if (methodInfo != null && methods != null)
+                {
                     try
                     { // resolve the index of the already selected method, if any
                         index = methods
                             .Select((v, i) => new { Method = v, Index = i })
-                            .First(x => x.Method == methodInfo)
-                            .Index;
+                            .OrderBy(m => (m.Method == methodInfo && m.Method.DeclaringType == methodInfo.DeclaringType) ? 0 : 1)
+                            .First().Index;
                     }
                     catch
                     {
                         //fallback, use the first
                         index = 0;
                     }
+                }
 
-                if (methods != null)
+                string[] validMethods = methods.Select(x => x.DeclaringType.Name + "." + x.Name).ToArray();
+                int val = EditorGUILayout.Popup("Signal handler", index, validMethods);
+
+                if (methods.Count > val && val >= 0)
                 {
-                    string[] validMethods = methods.Select(x => x.DeclaringType.Name + "." + x.Name).ToArray();
-                    int val = EditorGUILayout.Popup("Signal handler", index, validMethods);
-
-                    if (methods.Count > val)
+                    if (val != index)
                     {
-                        if (methods[val] != methodInfo)
-                        {
-                            //Undo.RecordObject(sensor, "Set Callback");
-                            //MarkSceneDirty();
-                            methodInfo = methods[val];
-                        }
+                        Undo.RecordObject(sensorObj, "Set Callback");
+                        MarkSceneDirty();
+                        methodInfo = methods[val];
+                    }
 
-                        if (methodInfo != null)
-                        {
-                            sensorObj.signalDetectionHandlerMethod = methods[val].Name;
-                            sensorObj.signalDetectionMonobehaviorHandler = methods[val].DeclaringType.Name;
-                        }
+                    if (methods[val] != null)
+                    {
+                        sensorObj.signalDetectionHandlerMethod = methods[val].Name;
+                        sensorObj.signalDetectionMonobehaviorHandler = methods[val].DeclaringType.Name;
+                        sensorObj.ResolveCallbacks();
                     }
                 }
             }
@@ -203,40 +204,42 @@ namespace UnitySensorySystem
             if (sensorObj.sensor != null)
             {
                 int index = 0;
+                sensorObj.ResolveCallbacks(); //otherwise the next method info won't be resolved
                 MethodInfo methodInfo = sensorObj.sensor.delegateDistanceCalculation != null ? sensorObj.sensor.delegateDistanceCalculation.Method : null;
 
-                try
-                { // resolve the index of the already selected method, if any
-                    index = methods
-                        .Select((v, i) => new { Method = v, Index = i })
-                        .First(x => x.Method == methodInfo)
-                        .Index;
-                }
-                catch
-                {
-                    //fallback, use the first
-                    index = 0;
-                }
-
-                if (methods != null)
-                {
-                    string[] validMethods = methods.Select(x => x.DeclaringType.Name + "." + x.Name).ToArray();
-                    int val = EditorGUILayout.Popup("Distance callback", index, validMethods);
-
-                    if (methods.Count > val)
+                if (methodInfo != null && methods != null)
+                { 
+                    try
+                    { // resolve the index of the already selected method, if any
+                        index = methods
+                            .Select((v, i) => new { Method = v, Index = i })
+                            .OrderBy(m => (m.Method == methodInfo && m.Method.DeclaringType == methodInfo.DeclaringType) ? 0 : 1)
+                            .First().Index;
+                    }
+                    catch
                     {
-                        if (methods[val] != methodInfo)
-                        {
-                            //Undo.RecordObject(sensor, "Set Callback");
-                            //MarkSceneDirty();
-                            methodInfo = methods[val];
-                        }
+                        //fallback, use the first
+                        index = 0;
+                    }
+                }
+                
+                string[] validMethods = methods.Select(x => x.DeclaringType.Name + "." + x.Name).ToArray();
+                int val = EditorGUILayout.Popup("Distance callback", index, validMethods);
 
-                        if (methodInfo != null)
-                        {
-                            sensorObj.customDistanceHandlerMethod = methods[val].Name;
-                            sensorObj.customDistanceMonobehaviorHandler = methods[val].DeclaringType.Name;
-                        }
+                if (methods.Count > val && val >= 0)
+                {
+                    if (methods[val] != methodInfo)
+                    {
+                        Undo.RecordObject(sensorObj, "Set Callback");
+                        MarkSceneDirty();
+                        methodInfo = methods[val];
+                    }
+
+                    if (methods[val] != null)
+                    {
+                        sensorObj.customDistanceHandlerMethod = methods[val].Name;
+                        sensorObj.customDistanceMonobehaviorHandler = methods[val].DeclaringType.Name;
+                        sensorObj.ResolveCallbacks();
                     }
                 }
             }
@@ -250,40 +253,42 @@ namespace UnitySensorySystem
             if (sensorObj.sensor != null)
             {
                 int index = 0;
+                sensorObj.ResolveCallbacks(); //otherwise the next method info won't be resolved
                 MethodInfo methodInfo = sensorObj.sensor.delegateLineOfSight != null ? sensorObj.sensor.delegateLineOfSight.Method : null;
 
-                try
-                { // resolve the index of the already selected method, if any
-                    index = methods
-                        .Select((v, i) => new { Method = v, Index = i })
-                        .First(x => x.Method == methodInfo)
-                        .Index;
-                }
-                catch
+                if (methodInfo != null && methods != null)
                 {
-                    //fallback, use the first
-                    index = 0;
-                }
-
-                if (methods != null)
-                {
-                    string[] validMethods = methods.Select(x => x.DeclaringType.Name + "." + x.Name).ToArray();
-                    int val = EditorGUILayout.Popup("Line Of Sight Calculation", index, validMethods);
-
-                    if (methods.Count > val)
+                    try
+                    { // resolve the index of the already selected method, if any
+                        index = methods
+                            .Select((v, i) => new { Method = v, Index = i })
+                            .OrderBy(m => (m.Method == methodInfo && m.Method.DeclaringType == methodInfo.DeclaringType) ? 0 : 1)
+                            .First().Index;
+                    }
+                    catch
                     {
-                        if (methods[val] != methodInfo)
-                        {
-                            //Undo.RecordObject(sensor, "Set Callback");
-                            //MarkSceneDirty();
-                            methodInfo = methods[val];
-                        }
+                        //fallback, use the first
+                        index = 0;
+                    }
+                }
+                
+                string[] validMethods = methods.Select(x => x.DeclaringType.Name + "." + x.Name).ToArray();
+                int val = EditorGUILayout.Popup("Line Of Sight Calculation", index, validMethods);
 
-                        if (methodInfo != null)
-                        {
-                            sensorObj.customLineOfSightHandlerMethod = methods[val].Name;
-                            sensorObj.customLineOfSightMonobehaviorHandler = methods[val].DeclaringType.Name;
-                        }
+                if (methods.Count > val && val >= 0)
+                {
+                    if (methods[val] != methodInfo)
+                    { 
+                        Undo.RecordObject(sensorObj, "Set Callback");
+                        MarkSceneDirty();
+                        methodInfo = methods[val];
+                    }
+
+                    if (methods[val] != null)
+                    {
+                        sensorObj.customLineOfSightHandlerMethod = methods[val].Name;
+                        sensorObj.customLineOfSightMonobehaviorHandler = methods[val].DeclaringType.Name;
+                        sensorObj.ResolveCallbacks();
                     }
                 }
             }

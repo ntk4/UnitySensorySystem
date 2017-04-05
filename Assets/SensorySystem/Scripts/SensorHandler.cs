@@ -11,7 +11,6 @@ namespace UnitySensorySystem
             Debug.Log("I see you! " + GetLevel(senseLink.awarenessLevel));
         }
 
-
         private string GetLevel(Awareness awareness)
         {
             if (awareness == Awareness.None)

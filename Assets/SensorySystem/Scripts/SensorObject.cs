@@ -15,9 +15,7 @@ namespace UnitySensorySystem
         public SensorManagerObject sensorManager;
 
         // Callback names (the actually persistent information)
-        [SerializeField]
         public string signalDetectionHandlerMethod;
-        [SerializeField]
         public string signalDetectionMonobehaviorHandler;
         // Custom Distance Callback names (the actually persistent information)
         public string customDistanceHandlerMethod;
@@ -26,7 +24,7 @@ namespace UnitySensorySystem
         public string customLineOfSightHandlerMethod;
         public string customLineOfSightMonobehaviorHandler;
 
-        void Start()
+        void Awake()
         {
             sensorManager = GameObject.Find("SensorManager").GetComponent<SensorManagerObject>();
             sensorManager.RegisterSensor(sensor);
@@ -54,7 +52,7 @@ namespace UnitySensorySystem
             if (signalDetectionMonobehaviorHandler != "" && signalDetectionHandlerMethod != "")
             {
                 IEnumerable<MonoBehaviour> allCallbacks = gameObject.GetComponents<MonoBehaviour>().
-                    Where(x => x.name == signalDetectionMonobehaviorHandler || x.GetType().Name == signalDetectionMonobehaviorHandler ||
+                    Where(x => x.name == signalDetectionHandlerMethod || x.GetType().Name == signalDetectionMonobehaviorHandler ||
                     x.GetType().BaseType.Name == signalDetectionMonobehaviorHandler);
 
                 if (allCallbacks == null || allCallbacks.Count() <= 0)
@@ -75,7 +73,7 @@ namespace UnitySensorySystem
             if (customDistanceMonobehaviorHandler != "" && customDistanceHandlerMethod != "")
             {
                 IEnumerable<MonoBehaviour> allCallbacks = gameObject.GetComponents<MonoBehaviour>().
-                    Where(x => x.name == customDistanceMonobehaviorHandler || x.GetType().Name == customDistanceMonobehaviorHandler ||
+                    Where(x => x.name == customDistanceHandlerMethod || x.GetType().Name == customDistanceMonobehaviorHandler ||
                     x.GetType().BaseType.Name == customDistanceMonobehaviorHandler);
 
                 if (allCallbacks.Count() <= 0)
@@ -95,7 +93,7 @@ namespace UnitySensorySystem
             if (customLineOfSightMonobehaviorHandler != "" && customLineOfSightHandlerMethod != "")
             {
                 IEnumerable<MonoBehaviour> allCallbacks = gameObject.GetComponents<MonoBehaviour>().
-                    Where(x => x.name == customLineOfSightMonobehaviorHandler || x.GetType().Name == customLineOfSightMonobehaviorHandler ||
+                    Where(x => x.name == customLineOfSightHandlerMethod || x.GetType().Name == customLineOfSightMonobehaviorHandler ||
                     x.GetType().BaseType.Name == customLineOfSightMonobehaviorHandler);
 
                 if (allCallbacks.Count() <= 0)
@@ -106,7 +104,7 @@ namespace UnitySensorySystem
                 else
                 {
                     MonoBehaviour callbackLineOfSightScript = allCallbacks.First();
-                    MethodInfo CallbackLineOfSight = callbackLineOfSightScript.GetType().GetMethods().Where(x => x.Name.Equals(customDistanceHandlerMethod)).First();
+                    MethodInfo CallbackLineOfSight = callbackLineOfSightScript.GetType().GetMethods().Where(x => x.Name.Equals(customLineOfSightHandlerMethod)).First();
                     sensor.delegateLineOfSight = (Sensor.DelegateLineOfSight)(
                         Sensor.DelegateLineOfSight.CreateDelegate(typeof(Sensor.DelegateLineOfSight), callbackLineOfSightScript, CallbackLineOfSight));
                 }

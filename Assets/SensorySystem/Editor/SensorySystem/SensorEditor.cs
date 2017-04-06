@@ -149,8 +149,8 @@ namespace UnitySensorySystem
 
         private void AddCallbackGUI(SensorObject sensorObj)
         {
-            //if (methods == null)
-            resolveCallbackMethods(sensorObj, typeof(SenseLink));
+            methods = new List<MethodInfo>();
+            sensorObj.resolveCallbackMethods(methods, typeof(SenseLink));
 
             if (sensorObj.sensor != null)
             {
@@ -198,8 +198,8 @@ namespace UnitySensorySystem
 
         private void AddCustomDistanceGUI(SensorObject sensorObj)
         {
-            //if (methods == null)
-            resolveCallbackMethods(sensorObj, typeof(Signal), typeof(Vector3));
+            methods = new List<MethodInfo>();
+            sensorObj.resolveCallbackMethods(methods, typeof(Signal), typeof(Vector3));
 
             if (sensorObj.sensor != null)
             {
@@ -247,8 +247,8 @@ namespace UnitySensorySystem
 
         private void AddLineOfSightGUI(SensorObject sensorObj)
         {
-            //if (methods == null)
-            resolveCallbackMethods(sensorObj, typeof(Signal), typeof(Vector3), typeof(bool));
+            methods = new List<MethodInfo>();
+            sensorObj.resolveCallbackMethods(methods, typeof(Signal), typeof(Vector3), typeof(bool));
 
             if (sensorObj.sensor != null)
             {
@@ -293,83 +293,6 @@ namespace UnitySensorySystem
                 }
             }
         }
-
-        private void resolveCallbackMethods(SensorObject sensorObj, Type parameter)
-        {
-            methods = new List<MethodInfo>();
-
-            MethodInfo[] temp;
-            foreach (MonoBehaviour script in sensorObj.gameObject.GetComponents<MonoBehaviour>())
-            {
-                if (script == null)
-                    continue; //which should never happen
-
-                temp = script.GetType()
-                .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public) // Instance methods, both public and private/protected
-                                                                                                  //.Where(x => x.DeclaringType == script.GetType()) // Do not only list methods defined in our own class, they may be in a super class
-                .Where(x => x.GetParameters().Length == 1) // Make sure we only get methods with one arguments
-                .Where(x => x.GetParameters()[0].ParameterType == parameter) // Make sure we only get methods with SenseLink argument
-                .Where(x => !ignoreMethods.Any(n => n == x.Name)) // Don't list methods in the ignoreMethods array (so we can exclude Unity specific methods, etc.)
-                                                                  //.Select(x => x)
-                .ToArray();
-
-                methods.AddRange(temp);
-            }
-        }
-
-        // TODO: Should be generalized for n parameters
-        private void resolveCallbackMethods(SensorObject sensorObj, Type parameter, Type returnType)
-        {
-            methods = new List<MethodInfo>();
-
-            MethodInfo[] temp;
-            foreach (MonoBehaviour script in sensorObj.gameObject.GetComponents<MonoBehaviour>())
-            {
-                if (script != null)
-                {
-                    temp = script.GetType()
-                    .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public) // Instance methods, both public and private/protected
-                                                                                                      //.Where(x => x.DeclaringType == script.GetType()) // Do not only list methods defined in our own class, they may be in a super class
-                    .Where(x => x.GetParameters().Length == 2) // Make sure we only get methods with two arguments
-                    .Where(x => x.GetParameters()[0].ParameterType == typeof(Sensor)) // Make sure we only get methods with Sensor first argument
-                    .Where(x => x.GetParameters()[1].ParameterType == parameter) // Make sure we only get methods with Signal second argument
-                    .Where(x => x.ReturnType == returnType)
-                    .Where(x => !ignoreMethods.Any(n => n == x.Name)) // Don't list methods in the ignoreMethods array (so we can exclude Unity specific methods, etc.)
-                                                                      //.Select(x => x)
-                    .ToArray();
-
-                    methods.AddRange(temp);
-                }
-            }
-        }
-
-        // TODO: avoid having this method. The previous one should be generalized for n parameters
-        private void resolveCallbackMethods(SensorObject sensorObj, Type parameter1, Type parameter2, Type returnType)
-        {
-            methods = new List<MethodInfo>();
-
-            MethodInfo[] temp;
-            foreach (MonoBehaviour script in sensorObj. gameObject.GetComponents<MonoBehaviour>())
-            {
-                if (script != null)
-                {
-                    temp = script.GetType()
-                    .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public) // Instance methods, both public and private/protected
-                                                                                                      //.Where(x => x.DeclaringType == script.GetType()) // Do not only list methods defined in our own class, they may be in a super class
-                    .Where(x => x.GetParameters().Length == 3) // Make sure we only get methods with two arguments
-                    .Where(x => x.GetParameters()[0].ParameterType == typeof(Sensor)) // Make sure we only get methods with Sensor first argument
-                    .Where(x => x.GetParameters()[1].ParameterType == parameter1) // Make sure we only get methods with Signal second argument
-                    .Where(x => x.GetParameters()[2].ParameterType == parameter2) // Make sure we only get methods with Signal second argument
-                    .Where(x => x.ReturnType == returnType)
-                    .Where(x => !ignoreMethods.Any(n => n == x.Name)) // Don't list methods in the ignoreMethods array (so we can exclude Unity specific methods, etc.)
-                                                                      //.Select(x => x)
-                    .ToArray();
-
-                    methods.AddRange(temp);
-                }
-            }
-        }
-
 
         void OnSceneGUI()
         {

@@ -17,16 +17,18 @@ namespace UnitySensorySystem
             return signal.Position - sensor.Position;
         }
 
-        public bool DefaultSingleRaycast(Sensor sensor, Signal signal, Vector3 sensorDirectionToSignal)
+        public bool DefaultSingleRaycast(Sensor sensor, Signal signal)
         {
+            Vector3 sensorDirectionToSignal = signal.Position - sensor.Position;
             if (Physics.Raycast(sensor.Position, sensorDirectionToSignal, out hit))
                 return hit.transform.position.Equals(signal.Position); //hit the signal, nothing in between
             return false;
         }
 
 
-        public bool DefaultCompleteRaycast(Sensor sensor, Signal signal, Vector3 sensorDirectionToSignal)
+        public bool DefaultCompleteRaycast(Sensor sensor, Signal signal)
         {
+            Vector3 sensorDirectionToSignal = signal.Position - sensor.Position;
             RaycastHit[] hits = Physics.RaycastAll(sensor.Position, sensorDirectionToSignal);
             return (hits != null && hits.Count() > 0 && hits.Select(x => x.transform.position == signal.Position).Count() > 0);
         }

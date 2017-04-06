@@ -35,7 +35,7 @@ namespace UnitySensorySystem
         [SerializeField]
         public DelegateDistanceCalculation delegateDistanceCalculation;
 
-        public delegate bool DelegateLineOfSight(Sensor sensor, Signal signal, Vector3 directionToSignal);
+        public delegate bool DelegateLineOfSight(Sensor sensor, Signal signal);
         [SerializeField]
         public DelegateLineOfSight delegateLineOfSight;
 
@@ -73,7 +73,7 @@ namespace UnitySensorySystem
             // 3. If the signal is in a view cone raycast to see if it's visible
             if ((int)maxAwarenessForSignal > (int)Awareness.None)
             {
-                Boolean sensed = invokeSelectedLineOfSightAlgorithm(signal, directionToSignal);
+                Boolean sensed = invokeSelectedLineOfSightAlgorithm(signal);
 
                 if (sensed)
                     return new SenseLink(Time.time, signal, maxAwarenessForSignal, true, signal.Sense);
@@ -97,11 +97,11 @@ namespace UnitySensorySystem
             return Vector3.zero;
         }
 
-        private bool invokeSelectedLineOfSightAlgorithm(Signal signal, Vector3 directionToSignal)
+        private bool invokeSelectedLineOfSightAlgorithm(Signal signal)
         {
             if (delegateLineOfSight != null)
             {
-                object result = delegateLineOfSight.Invoke(this, signal, directionToSignal);
+                object result = delegateLineOfSight.Invoke(this, signal);
                 if (result != null && result.GetType() == typeof(bool))
                 {
                     return (bool)result;

@@ -217,43 +217,6 @@ namespace UnitySensorySystem
             }
         }
 
-        public void resolveCallbackMethods(List<MethodInfo> methods, Type parameter1, Type parameter2, Type returnType)
-        {
-            resolveCallbackMethods(gameObject, methods, parameter1, parameter2, returnType);
-
-            if (sensorManager == null)
-                sensorManager = GameObject.FindObjectOfType<SensorManagerObject>();
-
-            if (sensorManager != null)
-                resolveCallbackMethods(sensorManager.gameObject, methods, parameter1, parameter2, returnType);
-        }
-
-        // TODO: avoid having this method. The previous one should be generalized for n parameters
-        public void resolveCallbackMethods(GameObject gameObject, List<MethodInfo> methods, Type parameter1, Type parameter2, Type returnType)
-        {
-
-            MethodInfo[] temp;
-            foreach (MonoBehaviour script in gameObject.GetComponents<MonoBehaviour>())
-            {
-                if (script != null)
-                {
-                    temp = script.GetType()
-                    .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public) // Instance methods, both public and private/protected
-                                                                                                      //.Where(x => x.DeclaringType == script.GetType()) // Do not only list methods defined in our own class, they may be in a super class
-                    .Where(x => x.GetParameters().Length == 3) // Make sure we only get methods with two arguments
-                    .Where(x => x.GetParameters()[0].ParameterType == typeof(Sensor)) // Make sure we only get methods with Sensor first argument
-                    .Where(x => x.GetParameters()[1].ParameterType == parameter1) // Make sure we only get methods with Signal second argument
-                    .Where(x => x.GetParameters()[2].ParameterType == parameter2) // Make sure we only get methods with Signal second argument
-                    .Where(x => x.ReturnType == returnType)
-                    .Where(x => !ignoreMethods.Any(n => n == x.Name)) // Don't list methods in the ignoreMethods array (so we can exclude Unity specific methods, etc.)
-                                                                      //.Select(x => x)
-                    .ToArray();
-
-                    methods.AddRange(temp);
-                }
-            }
-        }
-
     }
 
 }

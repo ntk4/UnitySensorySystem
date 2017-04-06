@@ -238,7 +238,7 @@ namespace UnitySensorySystem
         private void AddLineOfSightGUI(SensorObject sensorObj)
         {
             methods = new List<MethodInfo>();
-            sensorObj.resolveCallbackMethods(methods, typeof(Signal), typeof(Vector3), typeof(bool));
+            sensorObj.resolveCallbackMethods(methods, typeof(Signal), typeof(bool));
 
             if (sensorObj.sensor != null)
             {

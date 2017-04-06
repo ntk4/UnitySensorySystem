@@ -21,8 +21,6 @@ namespace UnitySensorySystem
         //[SerializeField]
         public float CoolDownSeconds;
 
-        public bool CustomDistanceCalculation = false;
-
         public Vector3 Position, Forward; // position interface
         private int InstanceID;
 
@@ -86,20 +84,17 @@ namespace UnitySensorySystem
 
         private Vector3 calculateDistanceFromSignal(Signal signal)
         {
-            if (CustomDistanceCalculation)
+            if (delegateDistanceCalculation != null)
             {
-                if (delegateDistanceCalculation != null)
+                object result = delegateDistanceCalculation.Invoke(this, signal);
+                if (result != null && result.GetType() == typeof(Vector3))
                 {
-                    object result = delegateDistanceCalculation.Invoke(this, signal);
-                    if (result != null && result.GetType() == typeof(Vector3))
-                    {
-                        return (Vector3)result;
-                    }
-
-                    Debug.LogWarning("Custom distance callback was not resolved or not called properly. Switching to default");
+                    return (Vector3)result;
                 }
+
+                Debug.LogWarning("Custom distance callback was not resolved or not called properly. Switching to default");
             }
-            return DefaultDistanceCalculator.CalculateDistance(this, signal);
+            return Vector3.zero;
         }
 
         private bool invokeSelectedLineOfSightAlgorithm(Signal signal, Vector3 directionToSignal)

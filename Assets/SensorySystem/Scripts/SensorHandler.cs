@@ -18,11 +18,6 @@ namespace UnitySensorySystem
             else
                 return awareness.ToString() + " awareness";
         }
-
-        public Vector3 CalculateDistance(Sensor sensor, Signal signal)
-        {
-            return new Vector3(100, 100, 100);
-        }
     }
 
 }

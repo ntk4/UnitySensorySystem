@@ -27,25 +27,15 @@ namespace UnitySensorySystem
             sensorObj.sensor.Sense = (SenseType)EditorGUILayout.EnumPopup("Sense type", sensorObj.sensor.Sense);
             sensorObj.sensor.CoolDownSeconds = EditorGUILayout.FloatField("Full Cooldown in seconds", sensorObj.sensor.CoolDownSeconds);
             AddCallbackGUI(sensorObj);
-
-            bool val = EditorGUILayout.Toggle("Custom Distance Calculation", sensorObj.sensor.CustomDistanceCalculation);
-            if (val != sensorObj.sensor.CustomDistanceCalculation)
-            {
-                Undo.RecordObject(sensorObj, "Custom Distance Calculation");
-                sensorObj.sensor.CustomDistanceCalculation = val;
-                MarkSceneDirty();
-            }
-
-            if (sensorObj.sensor.CustomDistanceCalculation)
-                AddCustomDistanceGUI(sensorObj);
+            AddCustomDistanceGUI(sensorObj);
+            AddLineOfSightGUI(sensorObj);
 
             EditorGUILayout.Space();
 
             if (sensorObj.sensor.Sense == SenseType.Vision)
             {
-                AddLineOfSightGUI(sensorObj);
                 
-                val = EditorGUILayout.Toggle("Preview View Cones", sensorObj.sensor.DrawCones);
+                bool val = EditorGUILayout.Toggle("Preview View Cones", sensorObj.sensor.DrawCones);
                 if (val != sensorObj.sensor.DrawCones)
                 {
                     Undo.RecordObject(sensorObj, "Preview cones");

@@ -315,12 +315,4 @@ namespace UnitySensorySystem
 
     }
 
-    public class DefaultDistanceCalculator
-    {
-        public static Vector3 CalculateDistance(Sensor sensor, Signal signal)
-        {
-            return signal.Position - sensor.Position;
-        }
-    }
-
 }

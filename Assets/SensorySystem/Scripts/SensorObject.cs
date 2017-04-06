@@ -63,15 +63,15 @@ namespace UnitySensorySystem
             if (sensorManager != null)
                 ResolveCallbacks(sensorManager.gameObject);
 
-            if (sensor.delegateSignalDetected == null)
+            if (sensor.delegateSignalDetected == null && signalDetectionHandlerMethod != null && !"".Equals(signalDetectionHandlerMethod))
                 Debug.LogError("Sensor Callback " + signalDetectionMonobehaviorHandler + "." +
                                     signalDetectionHandlerMethod + "() was not resolved or has been removed!");
 
-            if (sensor.delegateDistanceCalculation == null)
+            if (sensor.delegateDistanceCalculation == null && customDistanceHandlerMethod != null && !"".Equals(customDistanceHandlerMethod))
                 Debug.LogError("Custom Distance Callback " + customDistanceMonobehaviorHandler + "." +
                                     customDistanceHandlerMethod + "() was not resolved or has been removed!");
 
-            if (sensor.delegateLineOfSight == null)
+            if (sensor.delegateLineOfSight == null && customLineOfSightHandlerMethod != null && !"".Equals(customLineOfSightHandlerMethod))
                 Debug.LogError("Line Of Sight Callback " + customLineOfSightMonobehaviorHandler + "." +
                                     customLineOfSightHandlerMethod + "() was not resolved or has been removed!");
         }
@@ -86,10 +86,18 @@ namespace UnitySensorySystem
 
                 if (allCallbacks != null && allCallbacks.Count() > 0)
                 {
-                    MonoBehaviour callbackScript = allCallbacks.First();
-                    MethodInfo callbackMethod = callbackScript.GetType().GetMethods().Where(x => x.Name.Equals(signalDetectionHandlerMethod)).First();
-                    sensor.delegateSignalDetected = (Sensor.DelegateSignalDetected)(
-                        Sensor.DelegateSignalDetected.CreateDelegate(typeof(Sensor.DelegateSignalDetected), callbackScript, callbackMethod));
+                    try
+                    { 
+                        MonoBehaviour callbackScript = allCallbacks.First();
+                        MethodInfo callbackMethod = callbackScript.GetType().GetMethods().Where(x => x.Name.Equals(signalDetectionHandlerMethod)).First();
+                        sensor.delegateSignalDetected = (Sensor.DelegateSignalDetected)(
+                            Sensor.DelegateSignalDetected.CreateDelegate(typeof(Sensor.DelegateSignalDetected), callbackScript, callbackMethod));
+                    }
+                    catch
+                    {
+                        signalDetectionHandlerMethod = "";
+                        signalDetectionMonobehaviorHandler = "";
+                    }
                 }
             }
 
@@ -101,10 +109,18 @@ namespace UnitySensorySystem
 
                 if (allCallbacks.Count() > 0)
                 {
-                    MonoBehaviour callbackCustomDistanceScript = allCallbacks.First();
-                    MethodInfo CallbackCustomDistance = callbackCustomDistanceScript.GetType().GetMethods().Where(x => x.Name.Equals(customDistanceHandlerMethod)).First();
-                    sensor.delegateDistanceCalculation = (Sensor.DelegateDistanceCalculation)(
-                        Sensor.DelegateDistanceCalculation.CreateDelegate(typeof(Sensor.DelegateDistanceCalculation), callbackCustomDistanceScript, CallbackCustomDistance));
+                    try
+                    {
+                        MonoBehaviour callbackCustomDistanceScript = allCallbacks.First();
+                        MethodInfo CallbackCustomDistance = callbackCustomDistanceScript.GetType().GetMethods().Where(x => x.Name.Equals(customDistanceHandlerMethod)).First();
+                        sensor.delegateDistanceCalculation = (Sensor.DelegateDistanceCalculation)(
+                            Sensor.DelegateDistanceCalculation.CreateDelegate(typeof(Sensor.DelegateDistanceCalculation), callbackCustomDistanceScript, CallbackCustomDistance));
+                    }
+                    catch
+                    {
+                        customDistanceHandlerMethod = "";
+                        customDistanceMonobehaviorHandler = "";
+                    }
                 }
                     
             }
@@ -117,10 +133,17 @@ namespace UnitySensorySystem
 
                 if (allCallbacks.Count() > 0)
                 {
-                    MonoBehaviour callbackLineOfSightScript = allCallbacks.First();
-                    MethodInfo CallbackLineOfSight = callbackLineOfSightScript.GetType().GetMethods().Where(x => x.Name.Equals(customLineOfSightHandlerMethod)).First();
-                    sensor.delegateLineOfSight = (Sensor.DelegateLineOfSight)(
-                        Sensor.DelegateLineOfSight.CreateDelegate(typeof(Sensor.DelegateLineOfSight), callbackLineOfSightScript, CallbackLineOfSight));
+                    try
+                    {
+                        MonoBehaviour callbackLineOfSightScript = allCallbacks.First();
+                        MethodInfo CallbackLineOfSight = callbackLineOfSightScript.GetType().GetMethods().Where(x => x.Name.Equals(customLineOfSightHandlerMethod)).First();
+                        sensor.delegateLineOfSight = (Sensor.DelegateLineOfSight)(
+                            Sensor.DelegateLineOfSight.CreateDelegate(typeof(Sensor.DelegateLineOfSight), callbackLineOfSightScript, CallbackLineOfSight));
+                    } catch
+                    {
+                        customLineOfSightHandlerMethod = "";
+                        customLineOfSightMonobehaviorHandler = "";
+                    }
                 }
             }
         }
